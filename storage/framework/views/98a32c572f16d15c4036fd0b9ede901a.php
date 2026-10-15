@@ -1,0 +1,186 @@
+<!-- jQuery -->
+<script src="<?php echo e(url('assets/plugins/jquery/jquery.min.js')); ?>"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="<?php echo e(url('assets/plugins/jquery-ui/jquery-ui.min.js')); ?>"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script type="text/javascript">
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script src="<?php echo e(url('assets/plugins/bootstrap/js/bootstrap.bundle.min.js')); ?>"></script>
+
+<script src="<?php echo e(url('assets/plugins/bootstrap-switch/js/bootstrap-switch.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/bootstrap-switch/js/bootstrap-switch.min.js')); ?>"></script>
+
+
+<script src="<?php echo e(url('assets/plugins/moment/moment.min.js')); ?>"></script>
+<!-- overlayScrollbars -->
+<script src="<?php echo e(url('assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js')); ?>"></script>
+<!-- AdminLTE App -->
+<script src="<?php echo e(url('assets/dist/js/adminlte.js')); ?>"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="<?php echo e(url('assets/dist/js/demo.js')); ?>"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<script src="<?php echo e(url('assets/custom/js/sweetalert2.all.min.js')); ?>"></script>
+
+<script src="<?php echo e(url('assets/plugins/ekko-lightbox/ekko-lightbox.min.js')); ?>"></script>
+
+<script src="<?php echo e(url('assets/plugins/bootstrap-table/dist/bootstrap-table.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/bootstrap-table/extensions/fixed-columns/bootstrap-table-fixed-columns.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/bootstrap-table/extensions/mobile/bootstrap-table-mobile.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/bootstrap-table/extensions/resizable/bootstrap-table-resizable.min.js')); ?>"></script>
+
+<script type="text/javascript" src="<?php echo e(url('assets/custom/js/actionEvents.js')); ?>"></script>
+
+
+
+
+
+
+
+<!-- start :: include FilePond library -->
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond-plugin-image-preview.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond-plugin-image-validate-size.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond-plugin-media-preview.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond-plugin-file-validate-size.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond-plugin-file-validate-type.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond-plugin-pdf-preview.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/filepond/js/filepond.jquery.js')); ?>"></script>
+<!-- end :: include FilePond library -->
+
+<!-- Ekko Lightbox -->
+<script src="<?php echo e(url('assets/plugins/ekko-lightbox/ekko-lightbox.min.js')); ?>"></script>
+
+<script src="<?php echo e(url('assets/custom/js/switchery.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/tagify/tagify.min.js')); ?>"></script>
+
+<script src="<?php echo e(url('assets/plugins/tinymce/tinymce.min.js')); ?>"></script>
+
+<script src="<?php echo e(url('assets/plugins/jquery-validation/jquery.validate.min.js')); ?>"></script>
+<script src="<?php echo e(url('assets/plugins/jquery-validation/additional-methods.min.js')); ?>"></script>
+
+<script type="text/javascript">
+    $(function() {
+        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+            event.preventDefault();
+            $(this).ekkoLightbox({
+                alwaysShowClose: true
+            });
+        });
+        if (document.getElementById("meta_tags") != null) {
+            var input = document.querySelector('input[id=meta_tags]');
+            new Tagify(input);
+        }
+
+        if (document.getElementById("edit_meta_tags") != null) {
+            var input1 = document.querySelector('input[id=edit_meta_tags]');
+            new Tagify(input1);
+        }
+    });
+
+
+    $('#create_form').validate({
+        rules: {},
+        errorElement: 'span',
+        errorPlacement: function(error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function(element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function(element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+    $('#update_form').validate({
+        rules: {},
+        errorElement: 'span',
+        errorPlacement: function(error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function(element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function(element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+</script>
+
+
+
+<script src="<?php echo e(route('common.language.read')); ?>"></script>
+
+
+
+<script type="text/javascript" src="<?php echo e(url('assets/custom/js/bootstrap-table-locale.js')); ?>"></script>
+
+<script type="text/javascript">
+    var baseUrl = "<?php echo e(URL::to('/')); ?>";
+
+      // Load full language file for JavaScript
+    //   window.translations = {
+    //     <?php
+    //         $lang = Session::get('language');
+    //         $langCode = $lang->code ?? "en";
+    //         $langFile = resource_path('lang/' . $langCode . '.json');
+    //         if (file_exists($langFile)) {
+    //             $translations = json_decode(file_get_contents($langFile), true);
+    //             if ($translations && is_array($translations)) {
+    //                 foreach($translations as $key => $value) {
+    //                     // Escape single quotes and newlines in values
+    //                     $escapedValue = addslashes($value);
+    //                     echo "'" . addslashes($key) . "': '" . $escapedValue . "',\n";
+    //                 }
+    //             }
+    //         }
+    //     ?>
+    // };
+
+    // // Create translations alias for backward compatibility with custom.js
+    // var translations = window.translations || {};
+
+    // // Helper function to safely get translations with fallback
+    // if (typeof translations.get === 'undefined') {
+    //     translations.get = function(key, fallback) {
+    //         return this[key] !== undefined ? this[key] : (fallback || key);
+    //     };
+    // }
+
+</script>
+
+<script src="<?php echo e(url('assets/custom/js/custom.js')); ?>"></script>
+<script src="<?php echo e(url('assets/custom/js/bootstrap-table/formatter.js')); ?>"></script>
+<script src="<?php echo e(url('assets/custom/js/bootstrap-table/queryParams.js')); ?>"></script>
+
+
+<!-- Select2 -->
+<script src="<?php echo e(url('assets/plugins/select2/js/select2.min.js')); ?>"></script>
+
+
+<!-- Then include your custom translation override -->
+<script src="<?php echo e(asset('assets/custom/js/select2-locale.js')); ?>"></script>
+
+<script>
+    // console.log('Translations loaded:', window.translations);
+    // console.log('Trans function available:', typeof trans);
+    // console.log('Select2 available:', typeof $.fn.select2);
+</script>
+<?php if(Session::has('error')): ?>
+    <script type='text/javascript'>
+        showErrorToast('<?php echo e(Session::get('error')); ?>');
+    </script>
+<?php endif; ?>
+<?php if(Session::has('success')): ?>
+    <script type='text/javascript'>
+        showSuccessToast('<?php echo e(Session::get('success')); ?>');
+    </script>
+<?php endif; ?>
+
+<?php /**PATH C:\Vinothbabu\AuctionHub\resources\views/layouts/footer_script.blade.php ENDPATH**/ ?>
