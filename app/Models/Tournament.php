@@ -26,4 +26,10 @@ class Tournament extends Model
         "organizer_id",
         "logo",
     ];
+
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
 }

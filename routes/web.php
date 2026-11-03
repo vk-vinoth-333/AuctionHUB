@@ -306,8 +306,9 @@ Route::group(['middleware' => ['auth:admin', 'checkLogin', 'sanitize']], functio
 
         //AutionHub
         Route::resource('tournaments', TournamentController::class);
-        Route::resource('players', PlayerController::class);
         Route::resource('teams', TeamController::class);
+        Route::get('players/generate-number', [PlayerController::class, 'generateNumber'])->name('players.generate-number');
+        Route::resource('players', PlayerController::class);
     });
 });
 

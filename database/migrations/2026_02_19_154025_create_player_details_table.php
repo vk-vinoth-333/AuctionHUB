@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('player_details', function (Blueprint $table) {
@@ -19,15 +16,13 @@ return new class extends Migration
             $table->string('batting_style')->nullable();
             $table->string('bowling_style')->nullable();
             $table->string('original_proof')->nullable();
+            $table->string('payment_screenshot')->nullable(); // added to match required uploads
             $table->string('base_price')->nullable();
             $table->string('sold_price')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('player_details');
