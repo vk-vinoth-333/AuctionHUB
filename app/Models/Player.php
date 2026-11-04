@@ -24,6 +24,9 @@ class Player extends Model
         'payment_status',
         'status',
         'description',
+        'registration_status',
+        'registration_token',
+        'registration_notes'
     ];
 
     protected $casts = [

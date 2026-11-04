@@ -245,6 +245,41 @@
                                     </div>
                                 </div>
 
+                                <!-- Registration Source -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-slate-new">
+                                            <i class="fas fa-globe text-slate-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Registration Source</span>
+                                            <span class="info-box-number">
+                                                {{ ucfirst($player->registration_source ?? 'Admin') }}
+                                                @if ($player->registered_ip)
+                                                    <br><small class="text-muted">IP: {{ $player->registered_ip }}</small>
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Registration Status -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span
+                                            class="info-box-icon {{ ($player->registration_status ?? '') === 'approved' ? 'bg-green-new' : (($player->registration_status ?? '') === 'pending' ? 'bg-orange-new' : 'bg-red-new') }}">
+                                            <i
+                                                class="fas fa-id-card {{ ($player->registration_status ?? '') === 'approved' ? 'text-green-new' : (($player->registration_status ?? '') === 'pending' ? 'text-orange-new' : 'text-red-new') }}"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Registration Status</span>
+                                            <span class="info-box-number">
+                                                {{ ucfirst($player->registration_status ?? 'Approved') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Active Status -->
                                 <div class="col-md-6 col-sm-6 col-12">
                                     <div class="info-box">
@@ -300,6 +335,21 @@
                                                 @else
                                                     N/A
                                                 @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Reference -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-orange-new">
+                                            <i class="fas fa-hashtag text-orange-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Payment Reference / UTR</span>
+                                            <span class="info-box-number">
+                                                {{ $player->detail->payment_reference ?? 'N/A' }}
                                             </span>
                                         </div>
                                     </div>

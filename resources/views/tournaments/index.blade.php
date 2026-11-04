@@ -36,7 +36,7 @@
                 @can('tournament-create')
                     <div class="col-md-12 d-flex justify-content-end">
                         <!-- <button id="toggleButton" class="btn btn-primary mb-3 ml-1"><i
-                                                class="fas fa-plus-circle mr-2"></i></button> -->
+                                                                                class="fas fa-plus-circle mr-2"></i></button> -->
                         <a href="{{ route('tournaments.create') }}" class="btn btn-primary mb-3 ml-1">
                             <i class="fas fa-plus-circle"></i> {{ __('create') . ' ' . __('tournament') }}
                         </a>
@@ -69,9 +69,9 @@
                                             <tr>
 
                                                 <td>
-                                                    @if($tournament->logo)
-                                                        <img src="{{ asset('storage/' . $tournament->logo) }}" width="50" height="50"
-                                                            style="object-fit:cover;border-radius:6px;">
+                                                    @if ($tournament->logo)
+                                                        <img src="{{ asset('storage/' . $tournament->logo) }}" width="50"
+                                                            height="50" style="object-fit:cover;border-radius:6px;">
                                                     @else
                                                         <span class="text-muted">No logo</span>
                                                     @endif
@@ -109,28 +109,34 @@
                                                 </td>
 
                                                 @php
-                                                    $organizer_name = App\Models\Admin::where('id', $tournament->organizer_id)->first();
+                                                    $organizer_name = App\Models\Admin::where(
+                                                        'id',
+                                                        $tournament->organizer_id,
+                                                    )->first();
                                                 @endphp
                                                 <td>{{ $organizer_name->username ?? 'N/A' }}</td>
                                                 <td>
                                                     <a href="{{ route('tournaments.show', $tournament->id) }}"
-                                                        class="btn btn-sm btn-primary">
+                                                        class="btn btn-sm btn-primary" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
 
+                                                    <a href="{{ route('tournaments.auction', $tournament->id) }}"
+                                                        class="btn btn-sm btn-warning" title="Auction">
+                                                        <i class="fas fa-gavel"></i> Auction
+                                                    </a>
+
                                                     <a href="{{ route('tournaments.edit', $tournament->id) }}"
-                                                        class="btn btn-sm btn-primary">
+                                                        class="btn btn-sm btn-primary" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
 
-                                                    <form action="{{ route('tournaments.destroy', $tournament->id) }}" method="POST"
-                                                        style="display:inline-block"
+                                                    <form action="{{ route('tournaments.destroy', $tournament->id) }}"
+                                                        method="POST" style="display:inline-block"
                                                         onsubmit="return confirm('Are you sure to delete?')">
-
                                                         @csrf
                                                         @method('DELETE')
-
-                                                        <button class="btn btn-sm btn-danger">
+                                                        <button class="btn btn-sm btn-danger" title="Delete">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -140,9 +146,6 @@
                                             </tr>
 
                                         @empty
-                                            <!-- <tr>
-                                                                        <td colspan="8" class="text-center">No tournaments found</td>
-                                                                    </tr> -->
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -156,13 +159,11 @@
 @endsection
 
 @section('script')
-
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
-            //data table
             new DataTable('#tournaments_list_table', {
                 paging: true,
                 searching: true,
@@ -174,7 +175,5 @@
             });
 
         });
-
     </script>
-
 @endsection

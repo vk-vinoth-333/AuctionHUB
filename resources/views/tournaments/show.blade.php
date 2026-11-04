@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -20,7 +19,7 @@
                         </li>
                         <li class="breadcrumb-item text-dark">
                             <a href="{{ url('tournaments') }}" class="text-dark"><i
-                                class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournaments') }}</a>
+                                    class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournaments') }}</a>
                         </li>
                         <li class="breadcrumb-item active"><i
                                 class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournament_details') }}
@@ -46,7 +45,7 @@
 
                         <!-- Logo -->
                         <div class="col-md-4 text-center mt-3">
-                            @if($tournament->logo)
+                            @if ($tournament->logo)
                                 <img src="{{ asset('storage/' . $tournament->logo) }}" class="img-fluid rounded shadow">
                             @else
                                 <span class="text-muted">No Logo</span>
@@ -120,6 +119,36 @@
                                     </div>
                                 </div>
 
+                                <!-- Players Per Team -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-blue-new">
+                                            <i class="fas fa-user-plus text-blue-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Players Per Team</span>
+                                            <span class="info-box-number">
+                                                {{ $tournament->players_per_team ?? 'N/A' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Base Point -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-orange-new">
+                                            <i class="fas fa-coins text-orange-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Base Point (Per Player)</span>
+                                            <span class="info-box-number">
+                                                {{ number_format($tournament->base_point ?? 0) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Prize -->
                                 <div class="col-md-6 col-sm-6 col-12">
                                     <div class="info-box">
@@ -144,7 +173,7 @@
                                         <div class="info-box-content">
                                             <span class="info-box-text">Registration</span>
                                             <span class="info-box-number">
-                                                @if($tournament->is_pr_free)
+                                                @if ($tournament->is_pr_free)
                                                     Free
                                                 @else
                                                     ₹ {{ number_format($tournament->pr_amount) }}
@@ -153,6 +182,55 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- UPI ID -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-green-new">
+                                            <i class="fas fa-mobile-alt text-green-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">UPI ID</span>
+                                            <span class="info-box-number">
+                                                {{ $tournament->upi_id ?? 'N/A' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Phone -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-blue-new">
+                                            <i class="fas fa-phone text-blue-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Contact Phone</span>
+                                            <span class="info-box-number">
+                                                {{ $tournament->contact_phone ?? 'N/A' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment QR (Only show if exists) -->
+                                @if ($tournament->payment_qr_code)
+                                    <div class="col-md-6 col-sm-6 col-12">
+                                        <div class="info-box">
+                                            <span class="info-box-icon bg-purple-new">
+                                                <i class="fas fa-qrcode text-purple-new"></i>
+                                            </span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Payment QR</span>
+                                                <span class="info-box-number">
+                                                    <img src="{{ asset('storage/' . $tournament->payment_qr_code) }}"
+                                                        width="50" class="rounded border shadow-sm cursor-pointer"
+                                                        data-toggle="modal" data-target="#qrModal">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 <!-- Status -->
                                 <div class="col-md-6 col-sm-6 col-12">
@@ -171,7 +249,43 @@
                                     </div>
                                 </div>
 
-                                @if($tournament->description)
+                                <!-- Registration Status -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span
+                                            class="info-box-icon {{ $tournament->registration_open ? 'bg-green-new' : 'bg-red-new' }}">
+                                            <i
+                                                class="fas fa-door-open {{ $tournament->registration_open ? 'text-green-new' : 'text-red-new' }}"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Registration Status</span>
+                                            <span class="info-box-number">
+                                                {{ $tournament->registration_open ? 'Open' : 'Closed' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Registration Deadline -->
+                                <div class="col-md-6 col-sm-6 col-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-orange-new">
+                                            <i class="fas fa-clock text-orange-new"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Registration Deadline</span>
+                                            <span class="info-box-number">
+                                                @if ($tournament->registration_ends_at)
+                                                    {{ \Carbon\Carbon::parse($tournament->registration_ends_at)->format('d M Y, h:i A') }}
+                                                @else
+                                                    No Deadline
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if ($tournament->description)
                                     <!-- Description -->
                                     <div class="col-md-6 col-12">
                                         <div class="info-box">
@@ -210,5 +324,4 @@
 
         </div>
     </section>
-
 @endsection

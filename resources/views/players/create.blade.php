@@ -5,6 +5,32 @@
 @endsection
 
 @section('content')
+
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ __('edit') . ' ' . __('player') }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ route('home') }}" class="text-dark"><i
+                                    class="fas fa-home mr-1"></i>{{ __('dashboard') }}</a>
+                        </li>
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ url('players') }}" class="text-dark"><i
+                                    class="nav-icon fas fa-user-friends mr-1"></i>{{ __('players') }}</a>
+                        </li>
+                        <li class="breadcrumb-item active"><i
+                                class="nav-icon fas fa-user-edit mr-1"></i>{{ __('create') . ' ' . __('player') }}
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="content mt-4">
         <div class="container-fluid">
             <div class="row">
@@ -217,6 +243,9 @@
                                             <label class="required">Player Status</label>
                                             <select name="player_status"
                                                 class="form-control required-field @error('player_status') is-invalid @enderror">
+                                                <option value="pending"
+                                                    {{ old('player_status', 'pending') == 'pending' ? 'selected' : '' }}>
+                                                    Pending</option>
                                                 <option value="unsold"
                                                     {{ old('player_status', 'unsold') == 'unsold' ? 'selected' : '' }}>
                                                     Unsold</option>
@@ -255,10 +284,24 @@
                                     </div>
 
                                     <!-- Description -->
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Description</label>
                                             <textarea name="description" class="form-control" rows="3" placeholder="Player description">{{ old('description') }}</textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Reference -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Payment Reference / UTR (Optional)</label>
+                                            <input type="text" name="payment_reference"
+                                                value="{{ old('payment_reference') }}"
+                                                class="form-control @error('payment_reference') is-invalid @enderror"
+                                                placeholder="Enter UTR or transaction ID">
+                                            @error('payment_reference')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -335,7 +378,6 @@
         var switcheryInstances = [];
         document.addEventListener('DOMContentLoaded', function() {
 
-            // active/inactive switchery
             var elems = Array.prototype.slice.call(document.querySelectorAll(".status-switch"));
             elems.forEach(function(elem) {
                 var switchery = new Switchery(elem, {
@@ -348,7 +390,6 @@
                 switcheryInstances.push(switchery);
             });
 
-            // Auto-generate player number on tournament selection
             const tournamentSelect = document.getElementById('tournament_id');
             const playerNumberInput = document.getElementById('player_number');
 
@@ -378,8 +419,6 @@
                         });
                 });
 
-                // If old() value existed after validation fail, we already show it.
-                // Otherwise trigger the fetch on page load when a tournament is preselected.
                 if (tournamentSelect.value && !playerNumberInput.value) {
                     tournamentSelect.dispatchEvent(new Event('change'));
                 }

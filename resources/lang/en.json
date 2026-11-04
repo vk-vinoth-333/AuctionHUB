@@ -570,5 +570,15 @@
     "enter_base_price": "Enter base price",
     "enter_sold_price": "Enter sold price",
     "player_description": "Player description",
-    "team_description": "Team description"
+    "team_description": "Team description",
+
+    "auction": "Auction",
+    "auction_details": "Auction Details",
+    "auction_stats": "Auction Stats",
+    "base_point": "Base Point",
+    "total_players": "Total Players",
+    "remaining": "Remaining",
+    "available_points": "Available Points",
+    "player_count": "Player Count",
+    "view_players": "View Players"
 }

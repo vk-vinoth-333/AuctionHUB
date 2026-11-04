@@ -48,22 +48,21 @@ class PlayerController extends Controller
             'role'                => 'required|in:batsman,bowler,wicket_keeper,all_rounder',
             'bowling_style'       => 'required|in:right,left,na',
             'batting_style'       => 'required|in:right_handed,left_handed',
-            'player_status'       => 'required|in:sold,unsold',
+            'player_status'       => 'required|in:sold,unsold,pending',
             'payment_status'      => 'required|in:paid,not_paid',
             'city'                => 'nullable|string|max:255',
             'base_price'          => 'nullable|string|max:255',
             'sold_price'          => 'nullable|string|max:255',
-            // 3 required image uploads
             'photo'               => 'required|image|max:5120',
             'original_proof'      => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'payment_screenshot'  => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'payment_reference' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator->errors())->withInput();
         }
 
-        // Auto-generate player_number from tournament short_code
         $tournament = Tournament::findOrFail($request->tournament_id);
         $playerNumber = $this->generatePlayerNumber($tournament);
 
@@ -77,7 +76,10 @@ class PlayerController extends Controller
             $player->player_number = $playerNumber;
             $player->status        = $request->has('status') ? 1 : 0;
             $player->payment_status = $request->payment_status;
-            $player->player_status  = $request->player_status;   // ← add this line
+            $player->player_status  = $request->player_status;
+            $player->registration_source = 'admin';
+            $player->registration_status = 'approved';
+            $player->registered_ip = request()->ip();
 
             if ($request->hasFile('photo')) {
                 $player->photo = compressAndUpload($request->file('photo'), 'players');
@@ -93,6 +95,7 @@ class PlayerController extends Controller
             $detail->bowling_style = $request->bowling_style;
             $detail->base_price    = $request->base_price;
             $detail->sold_price    = $request->sold_price;
+            $detail->payment_reference = $request->payment_reference;
 
             if ($request->hasFile('original_proof')) {
                 $detail->original_proof = compressAndUpload($request->file('original_proof'), 'players/proofs');
@@ -142,15 +145,16 @@ class PlayerController extends Controller
             'role'                => 'required|in:batsman,bowler,wicket_keeper,all_rounder',
             'bowling_style'       => 'required|in:right,left,na',
             'batting_style'       => 'required|in:right_handed,left_handed',
-            'player_status'       => 'required|in:sold,unsold',
+            'player_status'       => 'required|in:sold,unsold,pending',
             'payment_status'      => 'required|in:paid,not_paid',
             'city'                => 'nullable|string|max:255',
             'base_price'          => 'nullable|string|max:255',
             'sold_price'          => 'nullable|string|max:255',
-            // images are optional on update (only required if replacing)
             'photo'               => 'nullable|image|max:5120',
             'original_proof'      => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'payment_screenshot'  => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'registration_status' => 'required|in:pending,approved,rejected',
+            'payment_reference'   => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -168,8 +172,8 @@ class PlayerController extends Controller
             $player->status        = $request->has('status') ? 1 : 0;
             $player->payment_status = $request->payment_status;
             $player->player_status  = $request->player_status;
+            $player->registration_status = $request->registration_status;
 
-            // Regenerate player_number if tournament changed
             if ($player->isDirty('tournament_id') || empty($player->player_number)) {
                 $tournament = Tournament::findOrFail($request->tournament_id);
                 $player->player_number = $this->generatePlayerNumber($tournament, $player->id);
@@ -188,6 +192,7 @@ class PlayerController extends Controller
             $detail->bowling_style = $request->bowling_style;
             $detail->base_price    = $request->base_price;
             $detail->sold_price    = $request->sold_price;
+            $detail->payment_reference = $request->payment_reference;
 
             if ($request->hasFile('original_proof')) {
                 $detail->original_proof = compressAndUpload($request->file('original_proof'), 'players/proofs');
@@ -218,10 +223,6 @@ class PlayerController extends Controller
         }
     }
 
-    /**
-     * AJAX endpoint to preview the next auto-generated player number.
-     * Format: {short_code}-{counter}   e.g. kpl-s2-1
-     */
     public function generateNumber(Request $request)
     {
         $request->validate([
@@ -236,9 +237,6 @@ class PlayerController extends Controller
         ]);
     }
 
-    /**
-     * Core generator used by store/update/generateNumber.
-     */
     private function generatePlayerNumber(Tournament $tournament, $excludePlayerId = null): string
     {
         $query = Player::where('tournament_id', $tournament->id);

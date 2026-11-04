@@ -204,8 +204,10 @@
                                                 <td>
                                                     @if (($player->player_status ?? null) === 'sold')
                                                         <span class="badge badge-success">{{ __('sold') }}</span>
+                                                    @elseif (($player->player_status ?? null) === 'unsold')
+                                                        <span class="badge badge-danger">{{ __('unsold') }}</span>
                                                     @else
-                                                        <span class="badge badge-warning">{{ __('unsold') }}</span>
+                                                        <span class="badge badge-warning">{{ __('pending') }}</span>
                                                     @endif
                                                 </td>
 

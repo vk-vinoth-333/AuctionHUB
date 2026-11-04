@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class TournamentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         ResponseService::noAnyPermissionThenRedirect(['tournament-list', 'tournament-create', 'tournament-edit', 'tournament-delete']);
@@ -25,15 +23,12 @@ class TournamentController extends Controller
 
             $tournaments = Tournament::whereNull('deleted_at')->get();
             return view('tournaments.index', compact('tournaments'));
-
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         ResponseService::noPermissionThenRedirect('tournament-create');
@@ -49,9 +44,7 @@ class TournamentController extends Controller
         return view('tournaments.create', compact('organizers'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         ResponseService::noPermissionThenRedirect('tournament-create');
@@ -63,9 +56,15 @@ class TournamentController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'total_teams' => 'required|integer|min:0',
+            'players_per_team' => 'required|integer|min:1',
+            'base_point' => 'required|numeric|min:0',
             'venue' => 'required|string',
             'city' => 'required|string',
             'pr_amount' => 'required_unless:is_pr_free,on|nullable|numeric|min:0',
+            'registration_ends_at' => 'nullable|date',
+            'upi_id' => 'nullable|string|max:255',
+            'contact_phone' => 'nullable|string|max:20',
+            'payment_qr_code' => 'nullable|image|max:5120',
         ]);
 
 
@@ -94,8 +93,6 @@ class TournamentController extends Controller
             return back()->withErrors($errors)->withInput();
         }
 
-        // dd("done");
-
         DB::beginTransaction();
 
         try {
@@ -110,15 +107,25 @@ class TournamentController extends Controller
             $tournament->city = $request->city;
             $tournament->total_teams = $request->total_teams ?? 0;
             $tournament->prize_amount = $request->prize_amount;
+            $tournament->players_per_team = $request->players_per_team;
+            $tournament->base_point = $request->base_point ?? 1000;
             $tournament->organizer_id = $request->organizer_id;
             $tournament->status = $request->has('status') ? 1 : 0;
             $tournament->is_pr_free = $request->has('is_pr_free') ? 1 : 0;
             $tournament->pr_amount = $request->pr_amount;
+            $tournament->registration_open = $request->has('registration_open') ? 1 : 0;
+            $tournament->registration_ends_at = $request->registration_ends_at;
+            $tournament->upi_id = $request->upi_id;
+            $tournament->contact_phone = $request->contact_phone;
 
             if ($request->hasFile('file')) {
                 $tournament->logo = compressAndUpload($request->file('file'), 'tournaments');
             } else {
                 $tournament->logo = '';
+            }
+
+            if ($request->hasFile('payment_qr_code')) {
+                $tournament->payment_qr_code = compressAndUpload($request->file('payment_qr_code'), 'tournaments/qr');
             }
 
             $tournament->save();
@@ -127,8 +134,6 @@ class TournamentController extends Controller
 
             return redirect('tournaments')
                 ->with('success', __('Tournament created successfully'));
-
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -140,9 +145,7 @@ class TournamentController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show($id)
     {
         ResponseService::noPermissionThenRedirect('tournament-view');
@@ -152,9 +155,7 @@ class TournamentController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit($id)
     {
         ResponseService::noPermissionThenRedirect('tournament-edit');
@@ -172,9 +173,7 @@ class TournamentController extends Controller
         ], compact('organizers'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, $id)
     {
         ResponseService::noPermissionThenRedirect('tournament-edit');
@@ -186,9 +185,15 @@ class TournamentController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'total_teams' => 'required|integer|min:0',
+            'players_per_team' => 'required|integer|min:1',
+            'base_point' => 'required|numeric|min:0',
             'venue' => 'required|string',
             'city' => 'required|string',
-            'pr_amount' => 'nullable|numeric|min:0',
+            'pr_amount' => 'required_unless:is_pr_free,on|nullable|numeric|min:0',
+            'registration_ends_at' => 'nullable|date',
+            'upi_id' => 'nullable|string|max:255',
+            'contact_phone' => 'nullable|string|max:20',
+            'payment_qr_code' => 'nullable|image|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -197,7 +202,6 @@ class TournamentController extends Controller
 
         $name = trim($request->name);
         $shortCode = trim($request->short_code);
-        // dd($shortCode);
         $nameExists = Tournament::where('name', $name)->where('id', '!=', $id)->exists();
         $shortCodeExists = Tournament::where('short_code', $shortCode)->where('id', '!=', $id)->exists();
 
@@ -232,10 +236,16 @@ class TournamentController extends Controller
                 'city' => $request->city,
                 'total_teams' => $request->total_teams,
                 'prize_amount' => $request->prize_amount,
+                'players_per_team' => $request->players_per_team,
+                'base_point' => $request->base_point ?? 1000,
                 'organizer_id' => $request->organizer_id,
                 'status' => $request->has('status') ? 1 : 0,
                 'is_pr_free' => $request->has('is_pr_free') ? 1 : 0,
                 'pr_amount' => $request->pr_amount,
+                'registration_open' => $request->has('registration_open') ? 1 : 0,
+                'registration_ends_at' => $request->registration_ends_at,
+                'upi_id' => $request->upi_id,
+                'contact_phone' => $request->contact_phone,
             ]);
 
             if ($request->hasFile('file')) {
@@ -243,11 +253,15 @@ class TournamentController extends Controller
                 $tournament->save();
             }
 
+            if ($request->hasFile('payment_qr_code')) {
+                $tournament->payment_qr_code = compressAndUpload($request->file('payment_qr_code'), 'tournaments/qr');
+                $tournament->save();
+            }
+
             DB::commit();
 
             return redirect()->route('tournaments.index')
                 ->with('success', 'Tournament updated successfully');
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -255,9 +269,7 @@ class TournamentController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy($id)
     {
         ResponseService::noPermissionThenRedirect('tournament-delete');
@@ -269,7 +281,6 @@ class TournamentController extends Controller
 
             return redirect()->route('tournaments.index')
                 ->with('success', 'Tournament deleted successfully');
-
         } catch (\Exception $e) {
 
             return back()->with('error', $e->getMessage());

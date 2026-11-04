@@ -28,81 +28,11 @@
                 <div class="sidebar-new-title">
                     {{ __('auction_management') }}
                 </div>
-                <!-- @if (getSettingMode('category_mode') == 1)
-                    @canany(['category-list', 'category-create', 'category-edit', 'category-delete'])
-                    <li class="nav-item">
-                        <a href="{{ url('category') }}"
-                            class="nav-link  {{ $currentUrl == url('category') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-cube"></i>
-                            <p>{{ __('category') }}</p>
-                        </a>
-                    </li>
-                    @endcanany
-                @endif
-                @if (getSettingMode('subcategory_mode') == 1)
-                    @canany(['sub-category-list', 'sub-category-create', 'sub-category-edit', 'sub-category-delete', 'sub-category-order-create'])
-                    <li class="nav-item">
-                        <a href="{{ url('sub_category') }}"
-                            class="nav-link  {{ $currentUrl == url('sub_category') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-cubes"></i>
-                            <p>{{ __('subcategory') }}</p>
-                        </a>
-                    </li>
-                    @endcanany
-                @endif
-                @canany(['tag-list', 'tag-create', 'tag-edit', 'tag-delete'])
-                <li class="nav-item">
-                    <a href="{{ url('tag') }}" class="nav-link {{ $currentUrl == url('tag') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-tag"></i>
-                        <p>{{ __('tag') }}</p>
-                    </a>
-                </li>
-                @endcanany -->
-                <!-- @canany(['news-list', 'news-create', 'news-edit', 'news-delete','news-edit-description','news-clone', 'news-bulk-delete'])
-                <li class="nav-item">
-                    <a href="{{ url('news') }}" class="nav-link {{ $currentUrl == url('news') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-newspaper"></i>
-                        <p>{{ __('tournaments') }}</p>
-                    </a>
-                </li>
-                @endcanany -->
-                <!-- @if (getSettingMode('breaking_news_mode') == 1)
-                    @canany(['breaking-news-list', 'breaking-news-create', 'breaking-news-edit', 'breaking-news-delete', 'breaking-news-bulk-delete'])
-                    <li class="nav-item">
-                        <a href="{{ url('breaking_news') }}"
-                            class="nav-link {{ $currentUrl == url('breaking_news') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-newspaper"></i>
-                            <p>{{ __('breaking_news') }}</p>
-                        </a>
-                    </li>
-                    @endcanany
-                @endif
-                @if (getSettingMode('live_streaming_mode') == 1)
-                    @canany(['live-streaming-list', 'live-streaming-create', 'live-streaming-edit', 'live-streaming-delete'])
-                    <li class="nav-item">
-                        <a href="{{ url('live_streaming') }}"
-                            class="nav-link {{ $currentUrl == url('live_streaming') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-stream"></i>
-                            <p>{{ __('live_streaming') }}</p>
-                        </a>
-                    </li>
-                    @endcanany
-                    @endif
-                    @if (getSettingMode('rss_feed_mode') == 1)
-                    @canany(['rss-list', 'rss-create', 'rss-edit', 'rss-delete', 'rss-bulk-delete'])
-                    <li class="nav-item">
-                        <a href="{{ url('rss') }}"
-                            class="nav-link {{ $currentUrl == url('rss') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-newspaper"></i>
-                            <p>{{ __('players_list') }}</p>
-                        </a>
-                    </li>
-                    @endcanany
-                @endif -->
+                
                 @canany(['tournament-list', 'tournament-create', 'tournament-edit', 'tournament-delete'])
                 <li class="nav-item">
                     <a href="{{ url('tournaments') }}" class="nav-link {{ $currentUrl == url('tournaments') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-newspaper"></i>
+                        <i class="nav-icon fas fa-medal"></i>
                         <p>{{ __('tournaments') }}</p>
                     </a>
                 </li>
@@ -110,7 +40,7 @@
                 @canany(['tournament-list', 'tournament-create', 'tournament-edit', 'tournament-delete'])
                 <li class="nav-item">
                     <a href="{{ url('teams') }}" class="nav-link {{ $currentUrl == url('teams') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-newspaper"></i>
+                        <i class="nav-icon fas fa-user-friends"></i>
                         <p>{{ __('teams') }}</p>
                     </a>
                 </li>
@@ -119,7 +49,7 @@
                     <li class="nav-item">
                         <a href="{{ url('players') }}"
                             class="nav-link {{ $currentUrl == url('players') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-newspaper"></i>
+                            <i class="nav-icon fas fa-user-circle"></i>
                             <p>{{ __('players') }}</p>
                         </a>
                     </li>

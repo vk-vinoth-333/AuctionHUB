@@ -11,22 +11,33 @@ class Tournament extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        "name",
-        "short_code",
-        "description",
-        "start_date",
-        "end_date",
-        "venue",
-        "city",
-        "total_teams",
-        "prize_amount",
-        "is_pr_free",
-        "pr_amount",
-        "status",
-        "organizer_id",
-        "logo",
+        'name',
+        'short_code',
+        'description',
+        'start_date',
+        'end_date',
+        'venue',
+        'city',
+        'total_teams',
+        'players_per_team',
+        'prize_amount',
+        'base_point',
+        'is_pr_free',
+        'pr_amount',
+        'status',
+        'registration_open',
+        'registration_ends_at',
+        'payment_qr_code',
+        'upi_id',
+        'contact_phone',
+        'organizer_id',
+        'logo',
     ];
 
+    public function teams()
+    {
+        return $this->hasMany(Team::class);
+    }
 
     public function players()
     {

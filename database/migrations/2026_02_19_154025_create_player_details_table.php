@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('batting_style')->nullable();
             $table->string('bowling_style')->nullable();
             $table->string('original_proof')->nullable();
-            $table->string('payment_screenshot')->nullable(); // added to match required uploads
+            $table->string('payment_screenshot')->nullable();
             $table->string('base_price')->nullable();
             $table->string('sold_price')->nullable();
+            $table->string('payment_reference', 100)->nullable();
             $table->timestamps();
         });
     }

@@ -42,11 +42,13 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UpdaterController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AuctionController;
 use App\Models\Settings;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 use App\Http\Controllers\TournamentController;
+use App\Http\Controllers\PlayerRegistrationController;
 
 Route::get('clear', function () {
     Artisan::call('optimize:clear');
@@ -74,7 +76,7 @@ Route::get('seeder', function () {
     return redirect()->back();
 });
 
-Route::get('migrate-status', function (){
+Route::get('migrate-status', function () {
     Artisan::call('migrate:status');
     return Artisan::output();
 });
@@ -306,11 +308,34 @@ Route::group(['middleware' => ['auth:admin', 'checkLogin', 'sanitize']], functio
 
         //AutionHub
         Route::resource('tournaments', TournamentController::class);
+
         Route::resource('teams', TeamController::class);
+
+        Route::get('tournaments/{id}/auction', [AuctionController::class, 'index'])
+            ->name('tournaments.auction');
+        Route::get('tournaments/{id}/auction/all-players', [AuctionController::class, 'allPlayers'])->name('auction.all-players');
+        Route::get('tournaments/{id}/auction/spin-unsold', [\App\Http\Controllers\AuctionController::class, 'spinWheelUnsold'])->name('auction.spin-unsold');
+        Route::get('tournaments/{id}/auction/spin', [AuctionController::class, 'spinWheel'])->name('auction.spin');
+        Route::get('tournaments/{id}/auction/assign/{player_id}', [AuctionController::class, 'showAssignPage'])->name('auction.show-assign');
+        Route::post('tournaments/{id}/auction/assign-player', [AuctionController::class, 'assignPlayer'])->name('auction.assign-player');
+        Route::post('tournaments/{id}/auction/revert-player', [\App\Http\Controllers\AuctionController::class, 'revertPlayer'])->name('auction.revert-player');
+        
         Route::get('players/generate-number', [PlayerController::class, 'generateNumber'])->name('players.generate-number');
         Route::resource('players', PlayerController::class);
     });
 });
+
+
+// Player Registration Routes
+Route::prefix('tournament/{shortCode}')->group(function () {
+    Route::get('register', [PlayerRegistrationController::class, 'show'])
+        ->name('player.register');
+ 
+    Route::post('register', [PlayerRegistrationController::class, 'store'])
+        ->middleware('throttle:8,1')
+        ->name('player.register.store');
+});
+
 
 /* Non-Authenticated Common Functions */
 Route::group(['prefix' => 'common'], static function () {

@@ -5,6 +5,32 @@
 @endsection
 
 @section('content')
+
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ __('edit') . ' ' . __('player') }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ route('home') }}" class="text-dark"><i
+                                    class="fas fa-home mr-1"></i>{{ __('dashboard') }}</a>
+                        </li>
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ url('players') }}" class="text-dark"><i
+                                    class="nav-icon fas fa-user-friends mr-1"></i>{{ __('players') }}</a>
+                        </li>
+                        <li class="breadcrumb-item active"><i
+                                class="nav-icon fas fa-user-edit mr-1"></i>{{ __('edit') . ' ' . __('player') }}
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="content mt-4">
         <div class="container-fluid">
             <div class="row">
@@ -237,6 +263,9 @@
                                             <label class="required">Player Status </label>
                                             <select name="player_status"
                                                 class="form-control required-field @error('player_status') is-invalid @enderror">
+                                                <option value="pending"
+                                                    {{ old('player_status', $player->player_status ?? '') == 'pending' ? 'selected' : '' }}>
+                                                    Pending</option>
                                                 <option value="unsold"
                                                     {{ old('player_status', $player->player_status ?? '') == 'unsold' ? 'selected' : '' }}>
                                                     Unsold</option>
@@ -276,23 +305,60 @@
                                     </div>
 
                                     <!-- Description -->
-                                    <div class="col-md-12">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Description</label>
                                             <textarea name="description" class="form-control" rows="3" placeholder="Player description">{{ old('description', $player->description ?? '') }}</textarea>
                                         </div>
                                     </div>
 
+                                    <!-- Registration Status -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="required">Registration Status</label>
+                                            <select name="registration_status"
+                                                class="form-control required-field @error('registration_status') is-invalid @enderror">
+                                                <option value="pending"
+                                                    {{ old('registration_status', $player->registration_status ?? '') == 'pending' ? 'selected' : '' }}>
+                                                    Pending</option>
+                                                <option value="approved"
+                                                    {{ old('registration_status', $player->registration_status ?? '') == 'approved' ? 'selected' : '' }}>
+                                                    Approved</option>
+                                                <option value="rejected"
+                                                    {{ old('registration_status', $player->registration_status ?? '') == 'rejected' ? 'selected' : '' }}>
+                                                    Rejected</option>
+                                            </select>
+                                            <span class="error-message text-danger"></span>
+                                            @error('registration_status')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Reference -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Payment Reference / UTR</label>
+                                            <input type="text" name="payment_reference"
+                                                value="{{ old('payment_reference', $player->detail->payment_reference ?? '') }}"
+                                                class="form-control @error('payment_reference') is-invalid @enderror"
+                                                placeholder="Enter UTR or transaction ID">
+                                            @error('payment_reference')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                     <!-- Player Photo -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Player Photo</label>
                                             <input name="photo" type="file" accept="image/*" class="filepond">
                                             @if ($player->photo)
                                                 <div class="mt-2">
                                                     <img src="{{ asset('storage/' . $player->photo) }}" width="80"
-                                                        class="rounded">
-                                                    <small class="text-muted d-block">Current photo — leave empty to
+                                                        >
+                                                    <small class="text-muted d-block mt-1">Current photo — leave empty to
                                                         keep</small>
                                                 </div>
                                             @endif
@@ -303,15 +369,20 @@
                                     </div>
 
                                     <!-- Payment Screenshot -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Payment Screenshot</label>
                                             <input name="payment_screenshot" type="file" class="filepond">
                                             @if (!empty($player->detail->payment_screenshot))
                                                 <div class="mt-2">
                                                     <a href="{{ asset('storage/' . $player->detail->payment_screenshot) }}"
-                                                        target="_blank">View current</a>
-                                                    <small class="text-muted d-block">Leave empty to keep</small>
+                                                        target="_blank">
+                                                        <img src="{{ asset('storage/' . $player->detail->payment_screenshot) }}"
+                                                            width="80" 
+                                                            alt="Payment Screenshot">
+                                                    </a>
+                                                    <small class="text-muted d-block mt-1">Current screenshot — leave empty
+                                                        to keep</small>
                                                 </div>
                                             @endif
                                             @error('payment_screenshot')
@@ -321,15 +392,27 @@
                                     </div>
 
                                     <!-- Original Proof -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Original Proof</label>
                                             <input name="original_proof" type="file" class="filepond">
                                             @if (!empty($player->detail->original_proof))
                                                 <div class="mt-2">
-                                                    <a href="{{ asset('storage/' . $player->detail->original_proof) }}"
-                                                        target="_blank">View current</a>
-                                                    <small class="text-muted d-block">Leave empty to keep</small>
+                                                    @if (Str::endsWith(strtolower($player->detail->original_proof), ['.jpg', '.jpeg', '.png', '.webp']))
+                                                        <a href="{{ asset('storage/' . $player->detail->original_proof) }}"
+                                                            target="_blank">
+                                                            <img src="{{ asset('storage/' . $player->detail->original_proof) }}"
+                                                                width="80" 
+                                                                alt="Original Proof">
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ asset('storage/' . $player->detail->original_proof) }}"
+                                                            target="_blank" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-file"></i> View Document
+                                                        </a>
+                                                    @endif
+                                                    <small class="text-muted d-block mt-1">Current proof — leave empty to
+                                                        keep</small>
                                                 </div>
                                             @endif
                                             @error('original_proof')
@@ -339,10 +422,10 @@
                                     </div>
 
                                     <!-- Status -->
-                                    <div class="col-md-6">
-                                        <div class="form-group mt-4">
+                                    <div class="col-md-12 mt-3">
+                                        <div class="form-group">
                                             <div class="form-check form-switch d-flex align-items-center">
-                                                <label class="mr-2">Active / Inactive</label>
+                                                <label class="mr-2 font-weight-bold">Active / Inactive</label>
                                                 <input class="form-check-input status-switch" type="checkbox"
                                                     name="status" id="status" {{ $player->status ? 'checked' : '' }}>
                                             </div>
