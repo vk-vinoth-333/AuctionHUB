@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             InstallationSeeder::class,
             PermissionSeeder::class,
-            AuctionDemoSeeder::class
+            // AuctionDemoSeeder::class
         ]);
     }
 }
