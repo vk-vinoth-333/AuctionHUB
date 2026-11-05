@@ -245,104 +245,155 @@ class SettingsController extends Controller
 
     public function storePanelSetting(Request $request)
     {
-        ResponseService::noPermissionThenRedirect('panel-settings');
-        $settings = [
-            'system_timezone',
-            'app_name',
-            'auto_delete_expire_news_mode',
-            'smtp_host',
-            'smtp_user',
-            'smtp_password',
-            'smtp_port',
-            'smtp_crypto',
-            'from_name',
-            'primary_color',
-            'secondary_color'
-        ];
+        try {
 
-        if ($request->hasFile('file1')) {
-            $image_full = $request->file('file1');
-            if ($image_full->isValid()) {
-                $previousFileName = Settings::where('type', 'app_logo_full')->value('message');
-                if ($previousFileName) {
+            ResponseService::noPermissionThenRedirect('panel-settings');
+
+            $settings = [
+                'system_timezone',
+                'app_name',
+                'auto_delete_expire_news_mode',
+                'smtp_host',
+                'smtp_user',
+                'smtp_password',
+                'smtp_port',
+                'smtp_crypto',
+                'from_name',
+                'primary_color',
+                'secondary_color'
+            ];
+
+            // Upload Full Logo
+            if ($request->hasFile('file1')) {
+
+                $image_full = $request->file('file1');
+
+                if ($image_full->isValid()) {
+
                     $setting = Settings::where('type', 'app_logo_full')->first();
-                    Storage::disk('public')->delete($setting->getRawOriginal('message'));
-                }
-                $setting = Settings::where('type', 'app_logo_full')->first();
-                if ($setting) {
-                    $setting->message = $request->file('file1')->store('logos', 'public');
-                    $setting->save();
+
+                    if ($setting && $setting->message) {
+                        Storage::disk('public')->delete(
+                            $setting->getRawOriginal('message')
+                        );
+                    }
+
+                    if ($setting) {
+                        $setting->message = $image_full->store('logos', 'public');
+                        $setting->save();
+                    }
                 }
             }
-        }
-        if ($request->hasFile('file')) {
-            $image = $request->file('file');
-            if ($image->isValid()) {
-                $previousFileName = Settings::where('type', 'app_logo')->value('message');
-                if ($previousFileName) {
+
+            // Upload Logo
+            if ($request->hasFile('file')) {
+
+                $image = $request->file('file');
+
+                if ($image->isValid()) {
+
                     $setting = Settings::where('type', 'app_logo')->first();
-                    Storage::disk('public')->delete($setting->getRawOriginal('message'));
+
+                    if ($setting && $setting->message) {
+                        Storage::disk('public')->delete(
+                            $setting->getRawOriginal('message')
+                        );
+                    }
+
+                    if ($setting) {
+                        $setting->message = $image->store('logos', 'public');
+                        $setting->save();
+                    }
                 }
-                $setting = Settings::where('type', 'app_logo')->first();
-                if ($setting) {
-                    $setting->message = $request->file('file')->store('logos', 'public');
-                    $setting->save();
-                }
             }
-        }
-        foreach ($settings as $type) {
-            $message = $request->input($type);
-            if ($type == 'smtp_host') {
-                EnvSet::setKey('MAIL_HOST', $message);
-                EnvSet::save();
-            }
-            if ($type == 'smtp_port') {
-                EnvSet::setKey('MAIL_PORT', $message);
-                EnvSet::save();
-            }
-            if ($type == 'smtp_user') {
-                EnvSet::setKey('MAIL_USERNAME', $message);
-                EnvSet::save();
-            }
-            if ($type == 'smtp_password') {
-                EnvSet::setKey('MAIL_PASSWORD', $message);
-                EnvSet::save();
-            }
-            if ($type == 'smtp_crypto') {
-                EnvSet::setKey('MAIL_ENCRYPTION', $message);
-                EnvSet::save();
-            }
-            if ($type == 'app_name') {
-                EnvSet::setKey('APP_NAME', $message);
-                EnvSet::save();
-            }
-            if ($type == 'system_timezone') {
-                $key = 'APP_TIMEZONE';
-                // Check if the key already exists in the .env file
-                if (!EnvSet::keyExists($key)) {
-                    // If key does not exist, append it to the end of the .env file
-                    $envFilePath = base_path('.env');
-                    File::append($envFilePath, "{$key}={$message}\n");
-                } else {
-                    // If key exists, update its value
-                    EnvSet::setKey($key, $message);
+
+            // Save Settings
+            foreach ($settings as $type) {
+
+                $message = $request->input($type);
+
+                if ($type == 'smtp_host') {
+                    EnvSet::setKey('MAIL_HOST', $message);
                     EnvSet::save();
                 }
-            }
-            $setting = Settings::where('type', $type)->first();
-            if ($message) {
-                if ($setting) {
-                    $setting->message = $message;
-                    $setting->save();
-                } else {
-                    $setting = new Settings();
-                    $setting->type = $type;
-                    $setting->message = $message;
-                    $setting->save();
+
+                if ($type == 'smtp_port') {
+                    EnvSet::setKey('MAIL_PORT', $message);
+                    EnvSet::save();
+                }
+
+                if ($type == 'smtp_user') {
+                    EnvSet::setKey('MAIL_USERNAME', $message);
+                    EnvSet::save();
+                }
+
+                if ($type == 'smtp_password') {
+                    EnvSet::setKey('MAIL_PASSWORD', $message);
+                    EnvSet::save();
+                }
+
+                if ($type == 'smtp_crypto') {
+                    EnvSet::setKey('MAIL_ENCRYPTION', $message);
+                    EnvSet::save();
+                }
+
+                if ($type == 'app_name') {
+                    EnvSet::setKey('APP_NAME', $message);
+                    EnvSet::save();
+                }
+
+                if ($type == 'system_timezone') {
+
+                    $key = 'APP_TIMEZONE';
+
+                    if (!EnvSet::keyExists($key)) {
+
+                        $envFilePath = base_path('.env');
+
+                        File::append($envFilePath, "{$key}={$message}\n");
+
+                    } else {
+
+                        EnvSet::setKey($key, $message);
+                        EnvSet::save();
+                    }
+                }
+
+                $setting = Settings::where('type', $type)->first();
+
+                if ($message) {
+
+                    if ($setting) {
+                        $setting->message = $message;
+                        $setting->save();
+
+                    } else {
+
+                        $setting = new Settings();
+                        $setting->type = $type;
+                        $setting->message = $message;
+                        $setting->save();
+                    }
                 }
             }
+
+            return redirect('panel-settings')->with('success', __('updated_success'));
+
+        } catch (\Throwable $e) {
+
+            // Log error details
+            \Log::error('Panel Settings Save Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->with(
+                'error',
+                'Something went wrong while saving panel settings. Please check Laravel logs.'
+            );
         }
-        return redirect('panel-settings')->with('success', __('updated_success'));
     }
 
     public function indexWebSetting()

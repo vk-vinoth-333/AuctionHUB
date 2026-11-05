@@ -91,17 +91,18 @@
             color: var(--brand);
         }
 
-        @media (max-width: 575px) {
+        @media (max-width: 767px) {
             .hero-in {
                 flex-direction: column;
                 align-items: flex-start;
+                text-align: left;
             }
 
             .logo-box {
                 flex-basis: 96px;
                 width: 96px;
                 height: 96px;
-                margin: 0 0 18px;
+                margin: 0 0 20px;
                 border-radius: 18px;
             }
         }
@@ -113,6 +114,7 @@
             padding: 4px 12px;
             border-radius: 6px;
             font-size: .85rem;
+            display: inline-block;
         }
 
         .hero h1 {
@@ -120,12 +122,14 @@
             font-size: clamp(1.9rem, 4.5vw, 3rem);
             margin: 14px 0 8px;
             line-height: 1.15;
+            word-break: break-word;
         }
 
         .hero p {
             color: #cbd5e1;
             max-width: 640px;
             margin: 0;
+            word-break: break-word;
         }
 
         .closes {
@@ -160,7 +164,7 @@
             padding: 16px;
             height: 100%;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Align to top for long text */
         }
 
         .info-icon {
@@ -173,49 +177,32 @@
             margin-right: 14px;
         }
 
+        .info-card .text-content {
+            min-width: 0; /* Fixes flex overflow */
+        }
+
         .info-card small {
             display: block;
             color: #6b7280;
             font-weight: 500;
             font-size: .75rem;
+            margin-bottom: 2px;
         }
 
         .info-card strong {
             font-weight: 700;
-            font-size: .98rem;
-            line-height: 1.25;
+            font-size: .95rem;
+            line-height: 1.3;
             display: block;
+            word-break: break-word; /* Fixes long text overflow */
         }
 
-        .ic-red {
-            background: #fde8ea;
-            color: var(--brand);
-        }
-
-        .ic-blue {
-            background: #e0ecff;
-            color: #2563eb;
-        }
-
-        .ic-green {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .ic-amber {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .ic-violet {
-            background: #ede9fe;
-            color: #7c3aed;
-        }
-
-        .ic-slate {
-            background: #e2e8f0;
-            color: #334155;
-        }
+        .ic-red { background: #fde8ea; color: var(--brand); }
+        .ic-blue { background: #e0ecff; color: #2563eb; }
+        .ic-green { background: #dcfce7; color: #16a34a; }
+        .ic-amber { background: #fef3c7; color: #d97706; }
+        .ic-violet { background: #ede9fe; color: #7c3aed; }
+        .ic-slate { background: #e2e8f0; color: #334155; }
 
         /* ---------- Form card ---------- */
         .card-secondary {
@@ -249,6 +236,7 @@
             place-items: center;
             margin-right: 10px;
             font-size: .9rem;
+            flex-shrink: 0;
         }
 
         .sec::after {
@@ -297,7 +285,7 @@
         .tile {
             position: relative;
             margin: 5px;
-            flex: 1 1 120px;
+            flex: 1 1 100px;
         }
 
         .tile input {
@@ -317,6 +305,7 @@
             font-weight: 600;
             font-size: .92rem;
             transition: all .15s;
+            height: 100%;
         }
 
         .tile span i {
@@ -412,10 +401,17 @@
             padding: 10px 0;
             border-top: 1px solid rgba(255, 255, 255, .1);
             font-size: .9rem;
+            gap: 10px;
         }
 
         .pay .row-d span:first-child {
             color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .pay .row-d strong {
+            word-break: break-word;
+            text-align: right;
         }
 
         .copy {
@@ -426,6 +422,7 @@
             font-size: .75rem;
             padding: 3px 9px;
             margin-left: 8px;
+            flex-shrink: 0;
         }
 
         .pay ol {
@@ -472,19 +469,13 @@
             overflow: hidden;
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                transition: none !important;
-            }
-        }
-
         .upi-container {
             display: flex;
             align-items: center;
             justify-content: flex-end;
             text-align: right;
             word-break: break-all;
-            max-width: 65%;
+            min-width: 0; 
         }
 
         .upi-container strong {
@@ -492,6 +483,19 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
+        }
+
+        /* ---- Responsive Ordering ---- */
+        @media (max-width: 991px) {
+            .pay-col {
+                order: -1; /* Moves payment card to the top on mobile/tablet */
+                margin-bottom: 1.5rem !important;
+                position: static !important; /* Removes sticky behavior on mobile */
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
         }
     </style>
 </head>
@@ -503,8 +507,7 @@
         <div class="container hero-in">
             <div class="logo-box">
                 @if ($tournament->logo)
-                    {{-- Adjust the URL if your logos are stored elsewhere --}}
-                    <img src="{{ asset('storage/' . $tournament->logo) }}" alt="{{ $tournament->name }} logo">
+                    <img src="{{ asset('storage/' . $tournament->logo) }}" alt="{{ $tournament->name }} logo" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-trophy\'></i>';">
                 @else
                     <i class="fas fa-trophy"></i>
                 @endif
@@ -559,10 +562,10 @@
                 ];
             @endphp
             @foreach ($cards as [$cls, $icon, $label, $value])
-                <div class="col-6 col-lg-3 mb-3">
+                <div class="col-md-6 col-lg-3 mb-3">
                     <div class="info-card">
                         <div class="info-icon {{ $cls }}"><i class="fas {{ $icon }}"></i></div>
-                        <div><small>{{ $label }}</small><strong>{{ $value }}</strong></div>
+                        <div class="text-content"><small>{{ $label }}</small><strong>{{ $value }}</strong></div>
                     </div>
                 </div>
             @endforeach
@@ -794,8 +797,8 @@
                     </div>
                 </div>
 
-                {{-- Right (col-4) --}}
-                <div class="col-lg-4 col-md-12 mb-4">
+                {{-- Right (col-4) - Added pay-col class --}}
+                <div class="col-lg-4 col-md-12 mb-4 pay-col">
                     <div class="card border-0 shadow-lg sticky-top pay">
                         <div class="card-body text-center p-4">
                             <h4 class="font-weight-bold mb-3"><i class="fas fa-wallet text-warning mr-2"></i>
@@ -934,7 +937,6 @@
             // copy UPI
             var copy = document.getElementById('copyUpi');
             if (copy) copy.addEventListener('click', function() {
-                // Get the full text from the title attribute, or the text content
                 var upiText = document.getElementById('upi').getAttribute('title') || document
                     .getElementById('upi').textContent.trim();
 
