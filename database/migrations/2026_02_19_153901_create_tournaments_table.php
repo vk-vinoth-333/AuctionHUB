@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('venue')->nullable();
             $table->string('city')->nullable();
             $table->integer('total_teams')->default(0);
+            $table->integer('total_pools')->default(2);
             $table->integer('players_per_team')->default(15);
             $table->string('prize_amount')->nullable();
             $table->bigInteger('base_point')->default(1000);

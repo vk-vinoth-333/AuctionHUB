@@ -3,24 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
-use App\Models\AdSpaces;
-use App\Models\BreakingNews;
-use App\Models\Category;
-use App\Models\Comments;
-use App\Models\FeaturedSections;
-use App\Models\Language;
-use App\Models\News;
-use App\Models\Pages;
-use App\Models\Role;
-use App\Models\Settings;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Models\Tournament;
+use App\Models\Team;
+use App\Models\Player;
+use App\Models\PlayerDetail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -61,114 +54,137 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $setting = Settings::where('type', 'app_version')->where('message', '3.1.3')->first();
-        if ($setting) {
-            $setting->message = '3.1.4';
-            $setting->save();
+        $tournamentId = $request->input('tournament_id');
+        $tournaments = Tournament::whereNull('deleted_at')->orderBy('name')->get();
+
+        // Base Queries
+        $playerQuery = Player::query();
+        $teamQuery = Team::query();
+        
+        if ($tournamentId) {
+            $playerQuery->where('tournament_id', $tournamentId);
+            $teamQuery->where('tournament_id', $tournamentId);
         }
 
-        $count_news_per_category = DB::table('tbl_news')->select('tbl_news.category_id', 'tbl_category.category_name', DB::raw('COUNT(tbl_news.id) as news_count'))->leftJoin('tbl_category', 'tbl_category.id', '=', 'tbl_news.category_id')->where('tbl_news.status', 1)->groupBy('tbl_news.category_id', 'tbl_category.category_name')->get();
-        $news_per_category = [];
-        foreach ($count_news_per_category as $row) {
-            $news_per_category[] = [
-                'category' => $row->category_name,
-                'news' => floatval($row->news_count),
+        // ==========================================
+        // 1. Top Stat Boxes
+        // ==========================================
+        $countTournaments = Tournament::whereNull('deleted_at')->count();
+        $countTeams = (clone $teamQuery)->whereNull('deleted_at')->count();
+        $countPlayers = (clone $playerQuery)->count();
+        
+        $soldCount = (clone $playerQuery)->where('player_status', 'sold')->count();
+        $unsoldCount = (clone $playerQuery)->where('player_status', 'unsold')->count();
+        $pendingCount = (clone $playerQuery)->where('player_status', 'pending')->count();
+        
+        $totalSpent = (clone $playerQuery)->where('player_status', 'sold')->sum('sold_out_points') ?? 0;
+        
+        $pendingRegistrations = (clone $playerQuery)
+            ->where('registration_status', 'pending')
+            ->where('registration_source', 'online')
+            ->count();
+
+        // ==========================================
+        // 2. Teams List & Player Counts
+        // ==========================================
+        $teams = (clone $teamQuery)
+            ->whereNull('deleted_at')
+            ->withSum(['players as spent_points' => function($q) {
+                $q->where('player_status', 'sold');
+            }], 'sold_out_points')
+            ->orderBy('created_at', 'desc')
+            ->take(6) // Show top 6 on dashboard
+            ->get();
+
+        // ==========================================
+        // 3. Top 5 Buys List
+        // ==========================================
+        $topBuys = (clone $playerQuery)
+            ->where('player_status', 'sold')
+            ->with('team')
+            ->orderBy('sold_out_points', 'desc')
+            ->take(5)
+            ->get();
+
+        // ==========================================
+        // 4. Chart Data
+        // ==========================================
+        
+        // Chart A: Auction Progress (Donut)
+        $statusChart = [
+            ['status' => 'Sold', 'count' => $soldCount, 'color' => '#16a34a'],
+            ['status' => 'Unsold', 'count' => $unsoldCount, 'color' => '#be212a'],
+            ['status' => 'Pending', 'count' => $pendingCount, 'color' => '#334155'],
+        ];
+
+        // Chart B: Role-wise Players (Horizontal Bar)
+        $roleQuery = PlayerDetail::select('role', DB::raw('count(*) as players'))
+            ->join('players', 'player_details.player_id', '=', 'players.id')
+            ->whereNotNull('role')
+            ->groupBy('role');
+            
+        if ($tournamentId) {
+            $roleQuery->where('players.tournament_id', $tournamentId);
+        }
+        
+        $rolesRaw = $roleQuery->get();
+        $roleNames = [1 => 'Batsman', 2 => 'Bowler', 3 => 'Wicket Keeper', 4 => 'All-Rounder'];
+        
+        $roleChart = [];
+        foreach ($rolesRaw as $r) {
+            $roleChart[] = [
+                'role' => $roleNames[$r->role] ?? 'Unknown',
+                'players' => $r->players
             ];
         }
+        usort($roleChart, fn($a, $b) => $b['players'] <=> $a['players']);
 
-        $count_news_per_language = DB::table('tbl_news as n')->select('l.language', DB::raw('COUNT(n.id) as news_count'))->join('tbl_languages as l', 'l.id', '=', 'n.language_id')->where('n.status', 1)->groupBy('n.language_id', 'l.language')->get();
-        $news_per_language = $count_news_per_language->map(function ($row) {
+        // Chart C: Team Purse Usage (Radial/Bar)
+        // Compares Available Points vs Spent Points for top teams
+        $teamPurseChart = $teams->map(function($team) {
+            $spent = (int) $team->spent_points;
             return [
-                'language' => $row->language,
-                'news' => floatval($row->news_count),
+                'team' => $team->short_name ?? substr($team->name, 0, 8),
+                'spent' => $spent,
+                'available' => (int) $team->available_points
             ];
         });
 
-        $count_surveys_per_language = DB::table('tbl_survey_question as s')->select('l.language', DB::raw('COUNT(s.id) as surveys_count'))->join('tbl_languages as l', 'l.id', '=', 's.language_id')->where('s.status', 1)->groupBy('s.language_id', 'l.language')->get();
-        $surveys_per_language = $count_surveys_per_language->map(function ($row) {
-            return [
-                'language' => $row->language,
-                'surveys' => floatval($row->surveys_count),
+        // Chart D: Registration Source (Pie)
+        $regSourceQuery = Player::select('registration_source', DB::raw('count(*) as count'))
+            ->groupBy('registration_source');
+        
+        if ($tournamentId) {
+            $regSourceQuery->where('tournament_id', $tournamentId);
+        }
+        
+        $regSourceRaw = $regSourceQuery->get();
+        $regSourceChart = [];
+        foreach ($regSourceRaw as $r) {
+            $regSourceChart[] = [
+                'source' => ucfirst($r->registration_source),
+                'count' => $r->count
             ];
-        });
-        $countBreakingNews = BreakingNews::count('id');
-        $countFeatredSection = FeaturedSections::where('status', 1)->count('id');
-        $countCategory = Category::count('id');
-        $countNews = News::count('id');
-        $countUsers = User::count('id');
-        $countUserRole = Role::count('id');
-        $countPages = Pages::where('status', 1)->count('id');
-        $countAdSpace = AdSpaces::where('status', 1)->count('id');
-
-        // Daily most viewed news
-        $daily_news_view = DB::table('tbl_news')
-        ->select('tbl_news.*', DB::raw('COUNT(tbl_news_view.id) as viewcount'))
-        ->join('tbl_news_view', 'tbl_news_view.news_id', '=', 'tbl_news.id')
-        ->whereDate('tbl_news_view.created_at', now()->toDateString())
-        ->where('tbl_news.status', 1)
-        ->groupBy('tbl_news.id')
-        ->orderByDesc('viewcount')
-        ->limit(3)
-        ->get();
-        // Weekly most viewed news
-        $weekly_news_view = DB::table('tbl_news')
-        ->select('tbl_news.*', DB::raw('COUNT(tbl_news_view.id) as viewcount'))
-        ->join('tbl_news_view', 'tbl_news_view.news_id', '=', 'tbl_news.id')
-        ->whereBetween('tbl_news_view.created_at', [now()->startOfWeek(), now()->endOfWeek()])
-        ->where('tbl_news.status', 1)
-        ->groupBy('tbl_news.id')
-        ->orderByDesc('viewcount')
-        ->limit(3)
-        ->get();
-
-        // Monthly most viewed news
-        $monthly_news_view = DB::table('tbl_news')
-        ->select('tbl_news.*', DB::raw('COUNT(tbl_news_view.id) as viewcount'))
-        ->join('tbl_news_view', 'tbl_news_view.news_id', '=', 'tbl_news.id')
-        ->whereYear('tbl_news_view.created_at', now()->year)
-        ->whereMonth('tbl_news_view.created_at', now()->month)
-        ->where('tbl_news.status', 1)
-        ->groupBy('tbl_news.id')
-        ->orderByDesc('viewcount')
-        ->limit(3)
-        ->get();
-
-        foreach ([$daily_news_view, $weekly_news_view, $monthly_news_view] as $collection) {
-            foreach ($collection as $row) {
-                if (!empty($row->image) && strpos($row->image, 'news/') === false) {
-                    $row->image = 'news/' . $row->image;
-                }
-                $row->image = Storage::disk('public')->exists($row->image) ? url(Storage::url($row->image)) : '';
-            }
         }
 
-        $recent_categories = Category::orderBy('id', 'DESC')->limit(8)->get();
-        $recent_comments = Comments::with('user')->orderBy('id', 'DESC')->limit(6)->get();
-        foreach ($recent_comments as $row) {
-            $timestamp = Carbon::parse($row->date);
-            $row->date = $timestamp->diffForHumans();
-        }
-
-        $enbled_language = Language::where('status', 1)->count();
-        return view('dashboard', [
-            'news_per_category' => $news_per_category,
-            'news_per_language' => $news_per_language,
-            'surveys_per_language' => $surveys_per_language,
-            'countBreakingNews' => $countBreakingNews,
-            'countFeatredSection' => $countFeatredSection,
-            'countCategory' => $countCategory,
-            'countNews' => $countNews,
-            'countUsers' => $countUsers,
-            'countUserRole' => $countUserRole,
-            'countPages' => $countPages,
-            'countAdSpace' => $countAdSpace,
-            'daily_news_view' => $daily_news_view,
-            'weekly_news_view' => $weekly_news_view,
-            'monthly_news_view' => $monthly_news_view,
-            'recent_categories' => $recent_categories,
-            'recent_comments' => $recent_comments,
-            'enbled_language' => $enbled_language,
-        ]);
+        return view('dashboard', compact(
+            'tournaments',
+            'tournamentId',
+            'countTournaments',
+            'countTeams',
+            'countPlayers',
+            'soldCount',
+            'unsoldCount',
+            'pendingCount',
+            'totalSpent',
+            'pendingRegistrations',
+            'teams',
+            'topBuys',
+            'statusChart',
+            'roleChart',
+            'teamPurseChart',
+            'regSourceChart'
+        ));
     }
 
     public function upload_img(Request $request)

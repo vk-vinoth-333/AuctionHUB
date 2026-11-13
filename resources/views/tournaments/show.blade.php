@@ -21,7 +21,7 @@
                             <a href="{{ url('tournaments') }}" class="text-dark"><i
                                     class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournaments') }}</a>
                         </li>
-                        <li class="breadcrumb-item active"><i
+                        <li class="breadcrumb-item active brand-red"><i
                                 class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournament_details') }}
                         </li>
                     </ol>

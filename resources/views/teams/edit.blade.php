@@ -5,6 +5,39 @@
 @endsection
 
 @section('content')
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ __('team_details') }}</h1>
+                </div>
+
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ route('home') }}" class="text-dark">
+                                <i class="fas fa-tachometer-alt mr-1"></i>{{ __('dashboard') }}
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ url('teams') }}" class="text-dark">
+                                <i class="fas fa-users mr-1"></i>{{ __('teams') }}
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item active brand-red">
+                            <i class="fas fa-pen mr-1"></i>{{ __('edit') }}
+                        </li>
+
+                    </ol>
+                </div>
+
+            </div>
+        </div>
+    </section>
 
     <section class="content mt-4">
         <div class="container-fluid">
@@ -36,14 +69,13 @@
 
                                                 <option value="">Select Tournament</option>
 
-                                                @foreach($tournaments as $tournament)
-
-                                                    <option value="{{ $tournament->id }}" {{ $team->tournament_id == $tournament->id ? 'selected' : '' }}>
+                                                @foreach ($tournaments as $tournament)
+                                                    <option value="{{ $tournament->id }}"
+                                                        {{ $team->tournament_id == $tournament->id ? 'selected' : '' }}>
 
                                                         {{ $tournament->name }}
 
                                                     </option>
-
                                                 @endforeach
 
                                             </select>
@@ -160,8 +192,7 @@
 
                                             <label>Description</label>
 
-                                            <textarea name="description" class="form-control" rows="3"
-                                                placeholder="Team description">{{ old('description', $team->description) }}</textarea>
+                                            <textarea name="description" class="form-control" rows="3" placeholder="Team description">{{ old('description', $team->description) }}</textarea>
 
                                         </div>
                                     </div>
@@ -175,12 +206,10 @@
 
                                             <input name="file" type="file" accept="image/*" class="filepond">
 
-                                            @if($team->logo)
-
+                                            @if ($team->logo)
                                                 <div class="mt-2">
                                                     <img src="{{ asset('storage/' . $team->logo) }}" width="100">
                                                 </div>
-
                                             @endif
 
                                         </div>
@@ -196,8 +225,8 @@
 
                                                 <label class="mr-2">Active / Inactive</label>
 
-                                                <input class="form-check-input status-switch" type="checkbox" name="status"
-                                                    id="status" {{ $team->status ? 'checked' : '' }}>
+                                                <input class="form-check-input status-switch" type="checkbox"
+                                                    name="status" id="status" {{ $team->status ? 'checked' : '' }}>
 
                                             </div>
 
@@ -230,21 +259,18 @@
             </div>
         </div>
     </section>
-
 @endsection
 
 
 @section('script')
-
     <script>
-
         var switcheryInstances = [];
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
             var elems = Array.prototype.slice.call(document.querySelectorAll(".status-switch"));
 
-            elems.forEach(function (elem) {
+            elems.forEach(function(elem) {
 
                 var switchery = new Switchery(elem, {
                     size: "small",
@@ -259,7 +285,5 @@
             });
 
         });
-
     </script>
-
 @endsection

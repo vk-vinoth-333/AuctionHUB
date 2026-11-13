@@ -101,8 +101,15 @@
                     </a>
 
                     <!-- Teams — Spin -->
-                    <button type="button" class="btn btn-filter-pill btn-filter-default">
+                    <a href="{{ route('auction.spin-teams', $tournament->id) }}"
+                        class="btn btn-filter-pill btn-filter-default">
                         <i class="fas fa-shield-alt mr-2"></i> Teams — Spin
+                    </a>
+
+                    <!-- NEW: Create Teams Button -->
+                    <button type="button" class="btn btn-filter-pill btn-filter-active" data-toggle="modal"
+                        data-target="#createTeamsModal">
+                        <i class="fas fa-plus-circle mr-2"></i> Create Teams
                     </button>
 
                 </div>
@@ -112,9 +119,10 @@
                 <div class="col-md-12 col-sm-12">
                     <div class="card h-100 shadow-sm border-0">
                         <div
-                            class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap py-3 border-bottom">
+                            class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
                             <h3 class="card-title mb-0 font-weight-bold text-dark">{{ __('teams_list') }}</h3>
-                            <span class="badge badge-brand px-3 py-2 font-weight-normal" style="border-radius: 20px;">
+                            <span class="badge badge-brand px-3 py-2 font-weight-normal ml-auto"
+                                style="border-radius: 20px; font-size: 0.95rem;">
                                 <i class="fas fa-shield-alt mr-1"></i> {{ count($tournament->teams) }}
                                 {{ __('Teams Enrolled') }}
                             </span>
@@ -321,22 +329,65 @@
         </div>
     </div>
 
+    <div class="modal fade" id="createTeamsModal" tabindex="-1" role="dialog" aria-hidden="true"
+        data-backdrop="static">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold" id="createTeamsModalLabel">
+                        <i class="fas fa-users mr-2"></i> Create Teams
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                        onclick="this.blur()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body text-left" style="background-color: #f4f6f9;">
+
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body p-3 d-flex align-items-center">
+                            <div class="info-box-icon bg-blue-new mr-3" style="border-radius: 50%;">
+                                <i class="fas fa-trophy text-blue-new"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted text-uppercase text-xs font-weight-bold d-block">Tournament</span>
+                                <h5 class="font-weight-bold text-dark mb-0">{{ $tournament->name }}
+                                    ({{ $tournament->short_code }})</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="bulkTeamForm">
+                        <div id="teamRowsWrapper">
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3 mb-4">
+                        <button type="button" class="btn btn-outline-dark font-weight-bold" id="addTeamRowBtn"
+                            style="border-radius: 8px;">
+                            <i class="fas fa-plus mr-1"></i> Add Another Team
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-top-0" style="background-color: #f4f6f9;">
+                    <button type="button" class="btn btn-light border font-weight-bold px-4"
+                        data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary font-weight-bold px-5" id="saveTeamsBtn">
+                        <i class="fas fa-save mr-2"></i> Save Teams
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
     <style>
-        :root {
-            --brand-primary: #000000;
-            --brand-secondary: #be212a;
-            --brand-secondary-dark: #9a1a22;
-            --brand-secondary-soft: #fdf2f3;
-            --brand-secondary-line: #f3c9cc;
-        }
-
-        .brand-red {
-            color: var(--brand-secondary) !important;
-        }
-
         .text-green {
             color: #16a34a !important;
         }
@@ -588,6 +639,122 @@
                 $('.table-responsive').hide();
                 $('#modalNoPlayers').show();
             }
+        });
+
+
+        $(document).ready(function() {
+            let rowIndex = 0;
+
+            function getTeamRowHtml(index) {
+                return `
+                    <div class="card shadow-sm border-0 mb-3 team-row-card" data-index="${index}">
+                        <div class="card-body p-3 position-relative">
+                            
+                            <!-- Remove Button -->
+                            <button type="button" class="btn btn-sm btn-danger remove-row-btn position-absolute" style="top: 10px; right: 10px; border-radius: 50%; width: 28px; height: 28px; padding: 0; z-index: 10;">
+                                <i class="fas fa-times" style="font-size: 12px;"></i>
+                            </button>
+                            
+                            <div class="row mt-2">
+                                <div class="col-md-6 mb-2">
+                                    <label class="font-weight-bold text-muted text-xs mb-1">Team Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="teams[${index}][name]" class="form-control team-name-input" placeholder="e.g. YOUNG BLOOD CRICKET CLUB" required>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="font-weight-bold text-muted text-xs mb-1">Short Name</label>
+                                    <input type="text" name="teams[${index}][short_name]" class="form-control" placeholder="e.g. YBCC">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label class="font-weight-bold text-muted text-xs mb-1">Owner Name</label>
+                                    <input type="text" name="teams[${index}][owner_name]" class="form-control" placeholder="Owner Name">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label class="font-weight-bold text-muted text-xs mb-1">Contact Email</label>
+                                    <input type="email" name="teams[${index}][contact_email]" class="form-control" placeholder="Email">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label class="font-weight-bold text-muted text-xs mb-1">Contact Phone</label>
+                                    <input type="text" name="teams[${index}][contact_phone]" class="form-control" placeholder="Phone">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            $('#addTeamRowBtn').on('click', function() {
+                $('#teamRowsWrapper').append(getTeamRowHtml(rowIndex));
+                rowIndex++;
+                $('#teamRowsWrapper').scrollTop($('#teamRowsWrapper')[0].scrollHeight);
+            });
+
+            $(document).on('click', '.remove-row-btn', function(e) {
+                e.preventDefault();
+                if ($('.team-row-card').length > 1) {
+                    $(this).closest('.team-row-card').remove();
+                } else {
+                    $(this).closest('.team-row-card').find('input').val('');
+                    showErrorToast('Cannot remove the last row. Fields cleared instead.');
+                }
+            });
+
+            $('#createTeamsModal').on('show.bs.modal', function() {
+                $('#teamRowsWrapper').empty();
+                rowIndex = 0;
+                $('#addTeamRowBtn').trigger('click');
+            });
+
+            $('#saveTeamsBtn').on('click', function() {
+                let formData = $('#bulkTeamForm').serialize();
+                let btn = $(this);
+
+                let isValid = true;
+                $('#bulkTeamForm').find('input[required]').each(function() {
+                    if ($(this).val().trim() === '') {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    showErrorToast('Please fill in all required fields (Team Name).');
+                    return;
+                }
+
+                btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Saving...');
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('auction.bulk-create-teams', $tournament->id) }}",
+                    method: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            showSuccessToast(res.message);
+                            $('#createTeamsModal').modal('hide');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showErrorToast(res.message);
+                            btn.html('<i class="fas fa-save mr-2"></i> Save Teams');
+                            btn.prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = 'Something went wrong.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        showErrorToast(msg);
+                        btn.html('<i class="fas fa-save mr-2"></i> Save Teams');
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
         });
     </script>
 @endsection

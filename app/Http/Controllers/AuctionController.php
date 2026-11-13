@@ -50,6 +50,106 @@ class AuctionController extends Controller
         return view('auction.all_players', compact('tournament', 'players'));
     }
 
+
+    public function bulkCreateTeams(Request $request, $id)
+    {
+        $request->validate([
+            'teams' => 'required|array|min:1',
+            'teams.*.name' => 'required|string|max:255',
+            'teams.*.short_name' => 'nullable|string|max:20',
+            'teams.*.owner_name' => 'nullable|string|max:255',
+            'teams.*.contact_email' => 'nullable|email|max:255',
+            'teams.*.contact_phone' => 'nullable|string|max:20',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $tournament = Tournament::findOrFail($id);
+            $count = 0;
+
+            foreach ($request->teams as $teamData) {
+                $team = new \App\Models\Team();
+                $team->tournament_id = $tournament->id;
+                $team->name = $teamData['name'];
+                $team->short_name = $teamData['short_name'] ?? null;
+                $team->owner_name = $teamData['owner_name'] ?? null;
+                $team->contact_email = $teamData['contact_email'] ?? null;
+                $team->contact_phone = $teamData['contact_phone'] ?? null;
+                $team->available_points = 60000; // Default starting points
+                $team->player_count = 0;
+                $team->status = 1;
+                $team->save();
+                $count++;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "$count Teams created successfully!"
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
+    public function updatePlayerStatus(Request $request, $id)
+    {
+        $request->validate([
+            'id' => 'required|exists:players,id',
+            'field' => 'required|in:player_status,payment_status,status',
+            'value' => 'required'
+        ]);
+
+        try {
+            $player = \App\Models\Player::findOrFail($request->id);
+            $player->{$request->field} = $request->value;
+            $player->save();
+
+            return response()->json([
+                'success' => true, 
+                'message' => __('Status updated successfully!') 
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function bulkUpdatePlayerStatus(Request $request, $id)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:players,id',
+            'field' => 'required|in:player_status,payment_status,status',
+            'value' => 'required'
+        ]);
+
+        try {
+            \App\Models\Player::whereIn('id', $request->ids)
+                ->update([$request->field => $request->value]);
+
+            return response()->json([
+                'success' => true, 
+                'message' => __('Bulk update successful!') 
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function spinWheel($id)
     {
         $tournament = Tournament::findOrFail($id);
@@ -116,7 +216,14 @@ class AuctionController extends Controller
         $request->validate([
             'player_id' => 'required|exists:players,id',
             'team_id'   => 'required|string',
-            'points'    => 'nullable|numeric|min:0',
+            'points'    => 'required|numeric|min:0',
+        ], [
+            'player_id.required' => 'Please select a player.',
+            'player_id.exists'   => 'The selected player is invalid.',
+            'team_id.required'   => 'Please select a Franchise / Team.',
+            'points.required'    => 'Please enter the Sold Price / Points.',
+            'points.numeric'     => 'Sold Price / Points must be a valid number.',
+            'points.min'         => 'Sold Price / Points cannot be negative.',
         ]);
 
         DB::beginTransaction();
@@ -251,5 +358,128 @@ class AuctionController extends Controller
             DB::rollBack();
             return back()->with('error', 'Error: ' . $e->getMessage());
         }
+    }
+
+    public function spinTeams($id)
+    {
+        $tournament = Tournament::findOrFail($id);
+
+        $availableTeams = $tournament->teams()
+            ->whereNull('deleted_at')
+            ->whereNull('pool')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $assignedTeams = $tournament->teams()
+            ->whereNull('deleted_at')
+            ->whereNotNull('pool')
+            ->orderBy('pool', 'asc')
+            ->get()
+            ->groupBy('pool');
+
+        $poolLetters = range('A', 'Z');
+        $pools = array_slice($poolLetters, 0, $tournament->total_pools ?? 1);
+
+        return view('auction.spin-teams', compact('tournament', 'availableTeams', 'assignedTeams', 'pools'));
+    }
+
+    public function assignTeamPool(Request $request, $id)
+    {
+        $request->validate([
+            'team_id' => 'required|exists:teams,id',
+        ]);
+
+        try {
+            $tournament = Tournament::findOrFail($id);
+            $team = \App\Models\Team::where('tournament_id', $id)->findOrFail($request->team_id);
+
+            if ($team->pool) {
+                return back()->with('error', 'This team is already assigned to a pool.');
+            }
+
+            $poolLetters = range('A', 'Z');
+            $pools = array_slice($poolLetters, 0, $tournament->total_pools ?? 1);
+
+            $poolCounts = [];
+            foreach ($pools as $p) {
+                $poolCounts[$p] = \App\Models\Team::where('tournament_id', $id)->where('pool', $p)->count();
+            }
+
+            $lowestCount = min($poolCounts);
+            $availablePools = array_keys($poolCounts, $lowestCount);
+
+            $nextPool = $availablePools[0];
+
+            $team->pool = $nextPool;
+            $team->save();
+
+            return back()->with('success', "Team {$team->name} automatically assigned to Pool {$nextPool} successfully!");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadPools($id)
+    {
+        $tournament = Tournament::findOrFail($id);
+
+        $teams = \App\Models\Team::where('tournament_id', $id)
+            ->whereNotNull('pool')
+            ->orderBy('pool', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $fileName = strtoupper($tournament->short_code) . '_Pools_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function () use ($teams) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['Pool', 'Team Name', 'Short Name', 'Owner Name', 'Contact Phone']);
+
+            foreach ($teams as $team) {
+                fputcsv($file, [
+                    'Pool ' . $team->pool,
+                    $team->name,
+                    $team->short_name ?? '-',
+                    $team->owner_name ?? '-',
+                    $team->contact_phone ?? '-'
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    
+    public function downloadPlayersPdf($id)
+    {
+        $tournament = Tournament::findOrFail($id);
+        
+        // Fetch all active players
+        $players = \App\Models\Player::with(['detail', 'team'])
+            ->where('tournament_id', $id)
+            ->where('status', 1)
+            // ->orderBy('player_number', 'asc')
+            ->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('auction.pdf_players', compact('tournament', 'players'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true, // Crucial for base64 images to render
+                'chroot' => public_path(), // Helps DomPDF find local files
+            ]);
+
+        return $pdf->download(strtoupper($tournament->short_code) . '_Players_List.pdf');
     }
 }

@@ -19,6 +19,7 @@ class Tournament extends Model
         'venue',
         'city',
         'total_teams',
+        'total_pools',
         'players_per_team',
         'prize_amount',
         'base_point',

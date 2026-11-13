@@ -16,6 +16,14 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item text-dark">
+                            <a href="{{ route('home') }}" class="text-dark"><i
+                                    class="fas fa-home mr-1"></i>{{ __('dashboard') }}</a>
+                        </li>
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ url('tournaments') }}" class="text-dark"><i
+                                    class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournaments') }}</a>
+                        </li>
+                        <li class="breadcrumb-item text-dark">
                             <a href="{{ route('tournaments.auction', $tournament->id) }}" class="text-dark"><i
                                     class="nav-icon fas fa-gavel mr-1"></i>{{ __('auction') }}</a>
                         </li>
@@ -126,7 +134,7 @@
                             <!-- The Ball -->
                             <div class="ball" id="ball">
                                 <div class="ball-seam"></div>
-                                <span id="displayNumber">?</span>
+                                <span id="displayNumber" style="font-size: 7px !important;">?</span>
                             </div>
                         </div>
 
@@ -361,10 +369,7 @@
 
         function setLabel(text) {
             currentLabel = String(text);
-            const len = currentLabel.length;
-            // Dynamically resize font based on length to fit cleanly inside the ball
-            const fs = len <= 3 ? 18 : (len <= 6 ? 14 : 10);
-            displayNumber.style.fontSize = (fs * scale()) + 'px';
+            displayNumber.style.fontSize = '7px';
             displayNumber.textContent = currentLabel;
         }
 
@@ -586,7 +591,8 @@
             spinBtn.disabled = false;
             spinBtn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> SPIN AGAIN';
 
-            const assignRoute = "{{ route('auction.show-assign', [$tournament->id, 'PLAYER_ID']) }}?type={{ $spinType ?? 'pending' }}";
+            const assignRoute =
+                "{{ route('auction.show-assign', [$tournament->id, 'PLAYER_ID']) }}?type={{ $spinType ?? 'pending' }}";
             document.getElementById('viewDetailsBtn').href = assignRoute.replace('PLAYER_ID', winner.id);
 
             actionArea.style.opacity = '1';

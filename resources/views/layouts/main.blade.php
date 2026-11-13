@@ -40,6 +40,18 @@
             --primary-color: <?php echo $primary_color; ?>;
             --secondary-color: <?php echo $secondary_color; ?>;
         }
+
+        :root {
+            --brand-primary: #000000;
+            --brand-secondary: #be212a;
+            --brand-secondary-dark: #9a1a22;
+            --brand-secondary-soft: #fdf2f3;
+            --brand-secondary-line: #f3c9cc;
+        }
+
+        .brand-red {
+            color: var(--brand-secondary) !important;
+        }
     </style>
 
 </head>

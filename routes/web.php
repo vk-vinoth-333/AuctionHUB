@@ -311,14 +311,25 @@ Route::group(['middleware' => ['auth:admin', 'checkLogin', 'sanitize']], functio
 
         Route::resource('teams', TeamController::class);
 
-        Route::get('tournaments/{id}/auction', [AuctionController::class, 'index'])
-            ->name('tournaments.auction');
+        Route::get('tournaments/{id}/auction', [AuctionController::class, 'index'])->name('tournaments.auction');
         Route::get('tournaments/{id}/auction/all-players', [AuctionController::class, 'allPlayers'])->name('auction.all-players');
-        Route::get('tournaments/{id}/auction/spin-unsold', [\App\Http\Controllers\AuctionController::class, 'spinWheelUnsold'])->name('auction.spin-unsold');
+        Route::get('tournaments/{id}/auction/spin-unsold', [AuctionController::class, 'spinWheelUnsold'])->name('auction.spin-unsold');
         Route::get('tournaments/{id}/auction/spin', [AuctionController::class, 'spinWheel'])->name('auction.spin');
         Route::get('tournaments/{id}/auction/assign/{player_id}', [AuctionController::class, 'showAssignPage'])->name('auction.show-assign');
         Route::post('tournaments/{id}/auction/assign-player', [AuctionController::class, 'assignPlayer'])->name('auction.assign-player');
-        Route::post('tournaments/{id}/auction/revert-player', [\App\Http\Controllers\AuctionController::class, 'revertPlayer'])->name('auction.revert-player');
+        Route::post('tournaments/{id}/auction/revert-player', [AuctionController::class, 'revertPlayer'])->name('auction.revert-player');
+
+        Route::post('players/{id}/update-status', [AuctionController::class, 'updatePlayerStatus'])->name('players.update-status');
+        Route::post('players/{id}/bulk-update-status', [AuctionController::class, 'bulkUpdatePlayerStatus'])->name('players.bulk-update-status');
+
+        Route::post('players/global/update-status', [PlayerController::class, 'updateStatus'])->name('players.update-status-global');
+        Route::post('players/global/bulk-update-status', [PlayerController::class, 'bulkUpdateStatus'])->name('players.bulk-update-status-global');
+
+        Route::get('tournaments/{id}/auction/spin-teams', [AuctionController::class, 'spinTeams'])->name('auction.spin-teams');
+        Route::post('tournaments/{id}/auction/assign-team-pool', [AuctionController::class, 'assignTeamPool'])->name('auction.assign-team-pool');
+        Route::get('tournaments/{id}/auction/download-pools', [AuctionController::class, 'downloadPools'])->name('auction.download-pools');
+        Route::post('tournaments/{id}/auction/bulk-create-teams', [\App\Http\Controllers\AuctionController::class, 'bulkCreateTeams'])->name('auction.bulk-create-teams');
+        Route::get('tournaments/{id}/auction/players-pdf', [\App\Http\Controllers\AuctionController::class, 'downloadPlayersPdf'])->name('auction.players-pdf');
         
         Route::get('players/generate-number', [PlayerController::class, 'generateNumber'])->name('players.generate-number');
         Route::resource('players', PlayerController::class);

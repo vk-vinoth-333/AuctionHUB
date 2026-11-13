@@ -19,10 +19,13 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item text-dark">
-                            <a href="{{ route('home') }}" class="text-dark"><i
-                                    class="fas fa-home mr-1"></i>{{ __('dashboard') }}</a>
+                            <a href="{{ route('home') }}" class="text-dark">
+                                <i class="fas fa-home mr-1"></i>{{ __('dashboard') }}
+                            </a>
                         </li>
-                        <li class="breadcrumb-item active"><i class="nav-icon fas fa-newspaper mr-1"></i>{{ __('teams') }}
+
+                        <li class="breadcrumb-item active brand-red">
+                            <i class="fas fa-users mr-1"></i>{{ __('teams') }}
                         </li>
                     </ol>
                 </div>

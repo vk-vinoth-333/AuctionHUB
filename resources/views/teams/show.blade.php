@@ -30,7 +30,7 @@
                         </li>
 
                         <li class="breadcrumb-item active">
-                            <i class="fas fa-users mr-1"></i>{{ __('team_details') }}
+                            <i class="fas fa-info-circle mr-1"></i>{{ __('team_details') }}
                         </li>
 
                     </ol>

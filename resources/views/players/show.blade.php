@@ -21,7 +21,7 @@
                             <a href="{{ url('players') }}" class="text-dark"><i
                                     class="nav-icon fas fa-user-friends mr-1"></i>{{ __('players') }}</a>
                         </li>
-                        <li class="breadcrumb-item active"><i
+                        <li class="breadcrumb-item active brand-red"><i
                                 class="nav-icon fas fa-user-friends mr-1"></i>{{ __('player_details') }}
                         </li>
                     </ol>

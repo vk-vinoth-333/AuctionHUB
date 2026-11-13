@@ -22,7 +22,7 @@
                             <a href="{{ route('home') }}" class="text-dark"><i
                                     class="fas fa-home mr-1"></i>{{ __('dashboard') }}</a>
                         </li>
-                        <li class="breadcrumb-item active"><i
+                        <li class="breadcrumb-item active brand-red"><i
                                 class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournaments') }}
                         </li>
                     </ol>

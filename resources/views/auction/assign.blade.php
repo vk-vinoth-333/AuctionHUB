@@ -197,13 +197,20 @@
                                 @else
                                     <div class="row mt-2">
                                         <div class="col-md-6 mb-3">
-                                            <label class="font-weight-bold text-muted text-sm">Select Franchise / Team
-                                                <span class="text-danger">*</span></label>
-                                            <select name="team_id" id="teamSelect" class="form-control form-control-lg"
-                                                required style="border-radius: 8px;">
+                                            <label class="font-weight-bold text-muted text-sm">
+                                                Select Franchise / Team
+                                                <span class="text-danger">*</span>
+                                            </label>
+
+                                            <select name="team_id" id="teamSelect"
+                                                class="form-control form-control-lg @error('team_id') is-invalid @enderror"
+                                                style="border-radius: 8px;">
+
                                                 <option value="">-- Choose Team --</option>
+
                                                 @foreach ($teams as $team)
-                                                    <option value="{{ $team->id }}">
+                                                    <option value="{{ $team->id }}"
+                                                        {{ old('team_id') == $team->id ? 'selected' : '' }}>
                                                         {{ $team->name }} (Pts:
                                                         {{ number_format($team->available_points) }}
                                                         | Pld:
@@ -211,26 +218,50 @@
                                                         | Max Bid: {{ number_format($team->max_bid) }})
                                                     </option>
                                                 @endforeach
-                                                <option value="unsold" class="text-danger font-weight-bold">-- Mark as
-                                                    UNSOLD --</option>
+
+                                                <option value="unsold" {{ old('team_id') == 'unsold' ? 'selected' : '' }}>
+                                                    -- Mark as UNSOLD --
+                                                </option>
                                             </select>
+
+                                            @error('team_id')
+                                                <div class="invalid-feedback d-block">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
                                         </div>
 
                                         <div class="col-md-6 mb-3">
-                                            <label class="font-weight-bold text-muted text-sm">Sold Price / Points <span
-                                                    class="text-danger">*</span></label>
+                                            <label class="font-weight-bold text-muted text-sm">
+                                                Sold Price / Points
+                                                <span class="text-danger">*</span>
+                                            </label>
+
                                             <div class="input-group input-group-lg">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light border-right-0"><i
-                                                            class="fas fa-coins text-muted"></i></span>
+                                                    <span class="input-group-text bg-light border-right-0">
+                                                        <i class="fas fa-coins text-muted"></i>
+                                                    </span>
                                                 </div>
+
                                                 <input type="number" name="points" id="pointsInput"
-                                                    class="form-control border-left-0" placeholder="e.g. 5000"
-                                                    min="0" style="border-radius: 0 8px 8px 0;">
+                                                    class="form-control border-left-0 @error('points') is-invalid @enderror"
+                                                    placeholder="e.g. 5000" min="0" value=""
+                                                    style="border-radius: 0 8px 8px 0;">
+
                                                 <div class="input-group-append">
                                                     <span class="input-group-text bg-light font-weight-bold">PTS</span>
                                                 </div>
                                             </div>
+
+                                            @error('points')
+                                                <div class="text-danger small mt-2">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+
                                             <small class="text-muted mt-2 d-block" id="pointHelpText"></small>
                                         </div>
                                     </div>
@@ -435,18 +466,23 @@
         </div>
     </div>
 
+    <!-- ===== Full Image Viewer Modal ===== -->
     <div class="modal fade" id="fullImageModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content border-0 shadow-lg" style="background: transparent;">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"
-                        onclick="this.blur()" style="opacity: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-                        <span aria-hidden="true" style="font-size: 2rem;">&times;</span>
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold" id="fullImageModalLabel">
+                        <i class="fas fa-image mr-2"></i> {{ __('preview') }}
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="this.blur()">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center p-0">
-                    <img src="{{ asset('storage/' . $player->photo) }}" class="img-fluid rounded shadow-lg"
-                        alt="{{ $player->name }}" style="max-height: 85vh; object-fit: contain;">
+                <div class="modal-body text-center" style="background-color: #f4f6f9; padding: 20px;">
+                    <img src="{{ $player->photo ? asset('storage/' . $player->photo) : asset('images/favicon.png') }}" 
+                         class="img-fluid rounded shadow-sm" 
+                         alt="{{ $player->name }}" 
+                         style="max-height: 75vh; object-fit: contain;">
                 </div>
             </div>
         </div>

@@ -56,6 +56,7 @@ class TournamentController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'total_teams' => 'required|integer|min:0',
+            'total_pools' => 'required|integer|min:1',
             'players_per_team' => 'required|integer|min:1',
             'base_point' => 'required|numeric|min:0',
             'venue' => 'required|string',
@@ -106,6 +107,7 @@ class TournamentController extends Controller
             $tournament->venue = $request->venue;
             $tournament->city = $request->city;
             $tournament->total_teams = $request->total_teams ?? 0;
+            $tournament->total_pools = $request->total_pools;
             $tournament->prize_amount = $request->prize_amount;
             $tournament->players_per_team = $request->players_per_team;
             $tournament->base_point = $request->base_point ?? 1000;
@@ -185,6 +187,7 @@ class TournamentController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'total_teams' => 'required|integer|min:0',
+            'total_pools' => 'required|integer|min:1',
             'players_per_team' => 'required|integer|min:1',
             'base_point' => 'required|numeric|min:0',
             'venue' => 'required|string',
@@ -235,6 +238,7 @@ class TournamentController extends Controller
                 'venue' => $request->venue,
                 'city' => $request->city,
                 'total_teams' => $request->total_teams,
+                'total_pools' => $request->total_pools,
                 'prize_amount' => $request->prize_amount,
                 'players_per_team' => $request->players_per_team,
                 'base_point' => $request->base_point ?? 1000,

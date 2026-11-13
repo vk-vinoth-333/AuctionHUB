@@ -5,6 +5,39 @@
 @endsection
 
 @section('content')
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ __('team_details') }}</h1>
+                </div>
+
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ route('home') }}" class="text-dark">
+                                <i class="fas fa-tachometer-alt mr-1"></i>{{ __('dashboard') }}
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item text-dark">
+                            <a href="{{ url('teams') }}" class="text-dark">
+                                <i class="fas fa-users mr-1"></i>{{ __('teams') }}
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item active brand-red">
+                            <i class="fas fa-user-plus mr-1"></i>{{ __('create') }}
+                        </li>
+
+                    </ol>
+                </div>
+
+            </div>
+        </div>
+    </section>
 
     <section class="content mt-4">
         <div class="container-fluid">
@@ -29,7 +62,7 @@
                                                 class="form-control required-field @error('tournament_id') is-invalid @enderror">
                                                 <option value="">Select Tournament</option>
 
-                                                @foreach($tournaments as $tournament)
+                                                @foreach ($tournaments as $tournament)
                                                     <option value="{{ $tournament->id }}">
                                                         {{ $tournament->name }}
                                                     </option>
@@ -133,8 +166,7 @@
                                         <div class="form-group">
                                             <label>Description</label>
 
-                                            <textarea name="description" class="form-control" rows="3"
-                                                placeholder="Team description"></textarea>
+                                            <textarea name="description" class="form-control" rows="3" placeholder="Team description"></textarea>
                                         </div>
                                     </div>
 
@@ -189,18 +221,16 @@
             </div>
         </div>
     </section>
-
 @endsection
 
 @section('script')
-
     <script>
         var switcheryInstances = [];
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
             //team active/inactive checkbox
             var elems = Array.prototype.slice.call(document.querySelectorAll(".status-switch"));
-            elems.forEach(function (elem) {
+            elems.forEach(function(elem) {
                 var switchery = new Switchery(elem, {
                     size: "small",
                     color: "#47C363",
@@ -212,7 +242,5 @@
             });
 
         });
-
     </script>
-
 @endsection

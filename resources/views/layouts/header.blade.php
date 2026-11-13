@@ -28,14 +28,14 @@
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="javascript:void(0)" role="button"><i class="fas fa-bars text-dark"></i></a>
         </li>
-        <li class="nav-item my-auto ml-2">
+        {{-- <li class="nav-item my-auto ml-2">
             <span class="badge" style="border-radius: 8px!important;padding:8px; color:{{ $setting['primary_color'] }};border:1px solid {{ $setting['primary_color'] }}">{{ $setting['app_version'] }}</span>
         </li>
         @if (env('DEMO_MODE'))
             <li class="nav-item my-auto ml-2">
                 <span class="badge badge-danger" style="border-radius: 8px!important;padding:8px">Demo mode</span>
             </li>
-        @endif
+        @endif --}}
     </ul>
     @php
         $setting = getSetting();
@@ -46,7 +46,7 @@
 
         <li class="nav-item dropdown user-menu">
             <div class="row">
-                <label class="current_language">
+                {{-- <label class="current_language">
                     {{ empty(session('language_name')) ? 'English' : session('language_name') }}
                 </label>
                 <div class="dropdown navbar_dropdown mr-2">
@@ -62,7 +62,7 @@
                             @endforeach
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="dropdown navbar_dropdown mr-4">
                     <a href="javascript:void(0)" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">

@@ -21,7 +21,7 @@
                             <a href="{{ url('tournaments') }}" class="text-dark"><i
                                     class="nav-icon fas fa-newspaper mr-1"></i>{{ __('tournaments') }}</a>
                         </li>
-                        <li class="breadcrumb-item active"><i
+                        <li class="breadcrumb-item active brand-red"><i
                                 class="nav-icon fas fa-newspaper mr-1"></i>{{ __('create') . ' ' . __('tournament') }}
                         </li>
                     </ol>
@@ -175,6 +175,16 @@
                                             @error('total_teams')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Total Pools -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="required">Total Pools (Groups)</label>
+                                            <input type="number" name="total_pools" class="form-control required-field" 
+                                                value="{{ old('total_pools', $tournament->total_pools ?? 2) }}" min="1">
+                                            <small class="text-muted">e.g. 2 for Pool A & B</small>
                                         </div>
                                     </div>
 

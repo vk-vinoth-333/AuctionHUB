@@ -5,12 +5,11 @@
 @endsection
 
 @section('content')
-
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">{{ __('edit') . ' ' . __('player') }}</h1>
+                    <h1 class="m-0">{{ __('create') . ' ' . __('player') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -22,8 +21,8 @@
                             <a href="{{ url('players') }}" class="text-dark"><i
                                     class="nav-icon fas fa-user-friends mr-1"></i>{{ __('players') }}</a>
                         </li>
-                        <li class="breadcrumb-item active"><i
-                                class="nav-icon fas fa-user-edit mr-1"></i>{{ __('create') . ' ' . __('player') }}
+                        <li class="breadcrumb-item active brand-red"><i
+                                class="nav-icon fas fa-user-plus mr-1"></i>{{ __('create') . ' ' . __('player') }}
                         </li>
                     </ol>
                 </div>
@@ -60,9 +59,7 @@
                                                     </option>
                                                 @endforeach
                                             </select>
-
                                             <span class="error-message text-danger"></span>
-
                                             @error('tournament_id')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -83,7 +80,6 @@
                                                     </option>
                                                 @endforeach
                                             </select>
-
                                             @error('team_id')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -98,9 +94,7 @@
                                                 value="{{ old('player_number') }}"
                                                 class="form-control @error('player_number') is-invalid @enderror"
                                                 placeholder="Select tournament to auto-generate" readonly>
-
                                             <small class="text-muted">Auto-generated from tournament short code</small>
-
                                             @error('player_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -114,10 +108,34 @@
                                             <input type="text" name="name" value="{{ old('name') }}"
                                                 class="form-control required-field @error('name') is-invalid @enderror"
                                                 placeholder="Enter player name">
-
                                             <span class="error-message text-danger"></span>
-
                                             @error('name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Phone -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="required">Phone Number</label>
+                                            <input type="text" name="phone" value="{{ old('phone') }}"
+                                                class="form-control required-field @error('phone') is-invalid @enderror"
+                                                placeholder="Enter phone number">
+                                            @error('phone')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Email Address</label>
+                                            <input type="email" name="email" value="{{ old('email') }}"
+                                                class="form-control @error('email') is-invalid @enderror"
+                                                placeholder="Enter email address">
+                                            @error('email')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -141,10 +159,29 @@
                                                     {{ old('role') == 'all_rounder' ? 'selected' : '' }}>All-Rounder
                                                 </option>
                                             </select>
-
                                             <span class="error-message text-danger"></span>
-
                                             @error('role')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Batting Style -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="required">Batting Style</label>
+                                            <select name="batting_style"
+                                                class="form-control required-field @error('batting_style') is-invalid @enderror">
+                                                <option value="">Select Batting Style</option>
+                                                <option value="right_handed"
+                                                    {{ old('batting_style') == 'right_handed' ? 'selected' : '' }}>Right
+                                                    Handed</option>
+                                                <option value="left_handed"
+                                                    {{ old('batting_style') == 'left_handed' ? 'selected' : '' }}>Left
+                                                    Handed</option>
+                                            </select>
+                                            <span class="error-message text-danger"></span>
+                                            @error('batting_style')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -163,9 +200,7 @@
                                                 <option value="left"
                                                     {{ old('bowling_style') == 'left' ? 'selected' : '' }}>Left</option>
                                             </select>
-
                                             <span class="error-message text-danger"></span>
-
                                             @error('bowling_style')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -179,31 +214,7 @@
                                             <input type="text" name="city" value="{{ old('city') }}"
                                                 class="form-control @error('city') is-invalid @enderror"
                                                 placeholder="Enter city">
-
                                             @error('city')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <!-- Batting Style (Dropdown) -->
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="required">Batting Style</label>
-                                            <select name="batting_style"
-                                                class="form-control required-field @error('batting_style') is-invalid @enderror">
-                                                <option value="">Select Batting Style</option>
-                                                <option value="right_handed"
-                                                    {{ old('batting_style') == 'right_handed' ? 'selected' : '' }}>
-                                                    Right Handed</option>
-                                                <option value="left_handed"
-                                                    {{ old('batting_style') == 'left_handed' ? 'selected' : '' }}>
-                                                    Left Handed</option>
-                                            </select>
-
-                                            <span class="error-message text-danger"></span>
-
-                                            @error('batting_style')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -213,25 +224,25 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Base Price</label>
-                                            <input type="text" name="base_price" value="{{ old('base_price') }}"
+                                            <input type="number" name="base_price" value="{{ old('base_price') }}"
                                                 class="form-control @error('base_price') is-invalid @enderror"
                                                 placeholder="Enter base price">
-
                                             @error('base_price')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    <!-- Sold Price -->
+                                    <!-- Sold Price / Points (Added to match DB) -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Sold Price</label>
-                                            <input type="text" name="sold_price" value="{{ old('sold_price') }}"
-                                                class="form-control @error('sold_price') is-invalid @enderror"
-                                                placeholder="Enter sold price">
-
-                                            @error('sold_price')
+                                            <label>Sold Points (Auction)</label>
+                                            <input type="number" name="sold_out_points"
+                                                value="{{ old('sold_out_points') }}"
+                                                class="form-control @error('sold_out_points') is-invalid @enderror"
+                                                placeholder="Enter sold points">
+                                            <small class="text-muted">This is the actual point value paid.</small>
+                                            @error('sold_out_points')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -252,9 +263,7 @@
                                                 <option value="sold"
                                                     {{ old('player_status') == 'sold' ? 'selected' : '' }}>Sold</option>
                                             </select>
-
                                             <span class="error-message text-danger"></span>
-
                                             @error('player_status')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -271,30 +280,42 @@
                                                     {{ old('payment_status', 'not_paid') == 'not_paid' ? 'selected' : '' }}>
                                                     Not Paid</option>
                                                 <option value="paid"
-                                                    {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid
-                                                </option>
+                                                    {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
                                             </select>
-
                                             <span class="error-message text-danger"></span>
-
                                             @error('payment_status')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    <!-- Description -->
-                                    <div class="col-md-6">
+                                    <!-- Registration Status -->
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Description</label>
-                                            <textarea name="description" class="form-control" rows="3" placeholder="Player description">{{ old('description') }}</textarea>
+                                            <label class="required">Registration Status</label>
+                                            <select name="registration_status"
+                                                class="form-control required-field @error('registration_status') is-invalid @enderror">
+                                                <option value="approved"
+                                                    {{ old('registration_status', 'approved') == 'approved' ? 'selected' : '' }}>
+                                                    Approved</option>
+                                                <option value="pending"
+                                                    {{ old('registration_status') == 'pending' ? 'selected' : '' }}>Pending
+                                                </option>
+                                                <option value="rejected"
+                                                    {{ old('registration_status') == 'rejected' ? 'selected' : '' }}>
+                                                    Rejected</option>
+                                            </select>
+                                            <span class="error-message text-danger"></span>
+                                            @error('registration_status')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
 
                                     <!-- Payment Reference -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Payment Reference / UTR (Optional)</label>
+                                            <label>Payment Reference / UTR</label>
                                             <input type="text" name="payment_reference"
                                                 value="{{ old('payment_reference') }}"
                                                 class="form-control @error('payment_reference') is-invalid @enderror"
@@ -305,8 +326,16 @@
                                         </div>
                                     </div>
 
+                                    <!-- Description -->
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <textarea name="description" class="form-control" rows="3" placeholder="Player description">{{ old('description') }}</textarea>
+                                        </div>
+                                    </div>
+
                                     <!-- Player Photo (required) -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="required">Player Photo</label>
                                             <input name="photo" type="file" accept="image/*"
@@ -318,7 +347,7 @@
                                     </div>
 
                                     <!-- Payment Screenshot (required) -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="required">Payment Screenshot</label>
                                             <input name="payment_screenshot" type="file"
@@ -330,7 +359,7 @@
                                     </div>
 
                                     <!-- Original Proof (required) -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="required">Original Proof</label>
                                             <input name="original_proof" type="file" class="filepond required-file">
@@ -341,7 +370,7 @@
                                     </div>
 
                                     <!-- Status -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group mt-4">
                                             <div class="form-check form-switch d-flex align-items-center">
                                                 <label class="mr-2">Active / Inactive</label>
@@ -352,14 +381,12 @@
                                     </div>
 
                                     <!-- Submit -->
-                                    <div class="col-md-12 text-right">
+                                    <div class="col-md-12 text-right mt-3 border-top pt-3">
                                         <a href="{{ url('players') }}" class="btn btn-default" style="padding:7px">
-                                            <i class="fas fa-arrow-left"></i>
-                                            {{ __('back') }}
+                                            <i class="fas fa-arrow-left"></i> {{ __('back') }}
                                         </a>
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save"></i>
-                                            {{ __('submit') }}
+                                            <i class="fas fa-save"></i> {{ __('submit') }}
                                         </button>
                                     </div>
 

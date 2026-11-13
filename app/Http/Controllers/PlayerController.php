@@ -44,19 +44,22 @@ class PlayerController extends Controller
             'tournament_id'       => 'required|exists:tournaments,id',
             'team_id'             => 'nullable|exists:teams,id',
             'name'                => 'required|string|max:255',
+            'phone'               => 'required|string|max:20',
+            'email'               => 'nullable|email|unique:players,email|max:255',
             'player_number'       => 'nullable|string|max:50',
             'role'                => 'required|in:batsman,bowler,wicket_keeper,all_rounder',
             'bowling_style'       => 'required|in:right,left,na',
             'batting_style'       => 'required|in:right_handed,left_handed',
             'player_status'       => 'required|in:sold,unsold,pending',
             'payment_status'      => 'required|in:paid,not_paid',
+            'registration_status' => 'required|in:pending,approved,rejected',
             'city'                => 'nullable|string|max:255',
-            'base_price'          => 'nullable|string|max:255',
-            'sold_price'          => 'nullable|string|max:255',
+            'base_price'          => 'nullable|numeric|min:0',
+            'sold_out_points'     => 'nullable|numeric|min:0',
             'photo'               => 'required|image|max:5120',
             'original_proof'      => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'payment_screenshot'  => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
-            'payment_reference' => 'nullable|string|max:100',
+            'payment_reference'   => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -70,16 +73,23 @@ class PlayerController extends Controller
 
         try {
             $player = new Player();
-            $player->tournament_id = $request->tournament_id;
-            $player->team_id       = $request->team_id;
-            $player->name          = $request->name;
-            $player->player_number = $playerNumber;
-            $player->status        = $request->has('status') ? 1 : 0;
-            $player->payment_status = $request->payment_status;
-            $player->player_status  = $request->player_status;
+            $player->tournament_id       = $request->tournament_id;
+            $player->team_id             = $request->team_id;
+            $player->name                = $request->name;
+            $player->phone               = $request->phone;
+            $player->email               = $request->email;
+            $player->player_number       = $playerNumber;
+            $player->status              = $request->has('status') ? 1 : 0;
+            $player->payment_status      = $request->payment_status;
+            $player->player_status       = $request->player_status;
+            $player->registration_status = $request->registration_status;
             $player->registration_source = 'admin';
-            $player->registration_status = 'approved';
-            $player->registered_ip = request()->ip();
+            $player->registered_ip       = request()->ip();
+            $player->sold_out_points     = $request->sold_out_points;
+            
+            if ($request->player_status === 'sold') {
+                $player->sold_at = now();
+            }
 
             if ($request->hasFile('photo')) {
                 $player->photo = compressAndUpload($request->file('photo'), 'players');
@@ -88,13 +98,12 @@ class PlayerController extends Controller
             $player->save();
 
             $detail = new PlayerDetail();
-            $detail->player_id     = $player->id;
-            $detail->city          = $request->city;
-            $detail->role          = $this->roleToInt($request->role);
-            $detail->batting_style = $request->batting_style;
-            $detail->bowling_style = $request->bowling_style;
-            $detail->base_price    = $request->base_price;
-            $detail->sold_price    = $request->sold_price;
+            $detail->player_id         = $player->id;
+            $detail->city              = $request->city;
+            $detail->role              = $this->roleToInt($request->role);
+            $detail->batting_style     = $request->batting_style;
+            $detail->bowling_style     = $request->bowling_style;
+            $detail->base_price        = $request->base_price;
             $detail->payment_reference = $request->payment_reference;
 
             if ($request->hasFile('original_proof')) {
@@ -141,19 +150,21 @@ class PlayerController extends Controller
             'tournament_id'       => 'required|exists:tournaments,id',
             'team_id'             => 'nullable|exists:teams,id',
             'name'                => 'required|string|max:255',
+            'phone'               => 'required|string|max:20',
+            'email'               => 'nullable|email|unique:players,email,' . $id . '|max:255',
             'player_number'       => 'nullable|string|max:50',
             'role'                => 'required|in:batsman,bowler,wicket_keeper,all_rounder',
             'bowling_style'       => 'required|in:right,left,na',
             'batting_style'       => 'required|in:right_handed,left_handed',
             'player_status'       => 'required|in:sold,unsold,pending',
             'payment_status'      => 'required|in:paid,not_paid',
+            'registration_status' => 'required|in:pending,approved,rejected',
             'city'                => 'nullable|string|max:255',
-            'base_price'          => 'nullable|string|max:255',
-            'sold_price'          => 'nullable|string|max:255',
+            'base_price'          => 'nullable|numeric|min:0',
+            'sold_out_points'     => 'nullable|numeric|min:0',
             'photo'               => 'nullable|image|max:5120',
             'original_proof'      => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'payment_screenshot'  => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
-            'registration_status' => 'required|in:pending,approved,rejected',
             'payment_reference'   => 'nullable|string|max:100',
         ]);
 
@@ -166,13 +177,22 @@ class PlayerController extends Controller
         try {
             $player = Player::findOrFail($id);
 
-            $player->tournament_id = $request->tournament_id;
-            $player->team_id       = $request->team_id;
-            $player->name          = $request->name;
-            $player->status        = $request->has('status') ? 1 : 0;
-            $player->payment_status = $request->payment_status;
-            $player->player_status  = $request->player_status;
+            $player->tournament_id       = $request->tournament_id;
+            $player->team_id             = $request->team_id;
+            $player->name                = $request->name;
+            $player->phone               = $request->phone;
+            $player->email               = $request->email;
+            $player->status              = $request->has('status') ? 1 : 0;
+            $player->payment_status      = $request->payment_status;
+            $player->player_status       = $request->player_status;
             $player->registration_status = $request->registration_status;
+            $player->sold_out_points     = $request->sold_out_points;
+            
+            if ($player->player_status === 'sold' && empty($player->sold_at)) {
+                $player->sold_at = now();
+            } elseif ($player->player_status !== 'sold') {
+                $player->sold_at = null;
+            }
 
             if ($player->isDirty('tournament_id') || empty($player->player_number)) {
                 $tournament = Tournament::findOrFail($request->tournament_id);
@@ -191,7 +211,6 @@ class PlayerController extends Controller
             $detail->batting_style = $request->batting_style;
             $detail->bowling_style = $request->bowling_style;
             $detail->base_price    = $request->base_price;
-            $detail->sold_price    = $request->sold_price;
             $detail->payment_reference = $request->payment_reference;
 
             if ($request->hasFile('original_proof')) {
@@ -269,5 +288,42 @@ class PlayerController extends Controller
             'all_rounder'   => 4,
             default         => null,
         };
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:players,id',
+            'field' => 'required|in:player_status,payment_status,status',
+            'value' => 'required'
+        ]);
+
+        try {
+            $player = Player::findOrFail($request->id);
+            $player->{$request->field} = $request->value;
+            $player->save();
+
+            return response()->json(['success' => true, 'message' => __('Status updated successfully!')]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:players,id',
+            'field' => 'required|in:player_status,payment_status,status',
+            'value' => 'required'
+        ]);
+
+        try {
+            Player::whereIn('id', $request->ids)->update([$request->field => $request->value]);
+
+            return response()->json(['success' => true, 'message' => __('Bulk update successful!')]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

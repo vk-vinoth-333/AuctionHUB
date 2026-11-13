@@ -22,7 +22,7 @@
                             <a href="{{ url('players') }}" class="text-dark"><i
                                     class="nav-icon fas fa-user-friends mr-1"></i>{{ __('players') }}</a>
                         </li>
-                        <li class="breadcrumb-item active"><i
+                        <li class="breadcrumb-item active brand-red"><i
                                 class="nav-icon fas fa-user-edit mr-1"></i>{{ __('edit') . ' ' . __('player') }}
                         </li>
                     </ol>
@@ -124,6 +124,32 @@
                                         </div>
                                     </div>
 
+                                    <!-- Phone -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="required">Phone Number</label>
+                                            <input type="text" name="phone" value="{{ old('phone', $player->phone) }}"
+                                                class="form-control required-field @error('phone') is-invalid @enderror"
+                                                placeholder="Enter phone number">
+                                            @error('phone')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Email Address</label>
+                                            <input type="email" name="email" value="{{ old('email', $player->email) }}"
+                                                class="form-control @error('email') is-invalid @enderror"
+                                                placeholder="Enter email address">
+                                            @error('email')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                     @php
                                         // player_details.role stores int: 1=batsman, 2=bowler, 3=wicket_keeper, 4=all_rounder
                                         $roleInt = (int) ($player->detail->role ?? 0);
@@ -151,13 +177,35 @@
                                                     {{ $roleVal == 'wicket_keeper' ? 'selected' : '' }}>Wicket Keeper
                                                 </option>
                                                 <option value="all_rounder"
-                                                    {{ $roleVal == 'all_rounder' ? 'selected' : '' }}>All-Rounder
-                                                </option>
+                                                    {{ $roleVal == 'all_rounder' ? 'selected' : '' }}>All-Rounder</option>
                                             </select>
 
                                             <span class="error-message text-danger"></span>
 
                                             @error('role')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Batting Style -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="required">Batting Style </label>
+                                            <select name="batting_style"
+                                                class="form-control required-field @error('batting_style') is-invalid @enderror">
+                                                <option value="">Select Batting Style</option>
+                                                <option value="right_handed"
+                                                    {{ old('batting_style', $player->detail->batting_style ?? '') == 'right_handed' ? 'selected' : '' }}>
+                                                    Right Handed</option>
+                                                <option value="left_handed"
+                                                    {{ old('batting_style', $player->detail->batting_style ?? '') == 'left_handed' ? 'selected' : '' }}>
+                                                    Left Handed</option>
+                                            </select>
+
+                                            <span class="error-message text-danger"></span>
+
+                                            @error('batting_style')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -204,34 +252,11 @@
                                         </div>
                                     </div>
 
-                                    <!-- Batting Style (Dropdown) -->
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="required">Batting Style </label>
-                                            <select name="batting_style"
-                                                class="form-control required-field @error('batting_style') is-invalid @enderror">
-                                                <option value="">Select Batting Style</option>
-                                                <option value="right_handed"
-                                                    {{ old('batting_style', $player->detail->batting_style ?? '') == 'right_handed' ? 'selected' : '' }}>
-                                                    Right Handed</option>
-                                                <option value="left_handed"
-                                                    {{ old('batting_style', $player->detail->batting_style ?? '') == 'left_handed' ? 'selected' : '' }}>
-                                                    Left Handed</option>
-                                            </select>
-
-                                            <span class="error-message text-danger"></span>
-
-                                            @error('batting_style')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
                                     <!-- Base Price -->
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Base Price</label>
-                                            <input type="text" name="base_price"
+                                            <input type="number" name="base_price"
                                                 value="{{ old('base_price', $player->detail->base_price ?? '') }}"
                                                 class="form-control @error('base_price') is-invalid @enderror"
                                                 placeholder="Enter base price">
@@ -242,16 +267,16 @@
                                         </div>
                                     </div>
 
-                                    <!-- Sold Price -->
+                                    <!-- Sold Price / Points (Added to match DB) -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Sold Price</label>
-                                            <input type="text" name="sold_price"
-                                                value="{{ old('sold_price', $player->detail->sold_price ?? '') }}"
-                                                class="form-control @error('sold_price') is-invalid @enderror"
-                                                placeholder="Enter sold price">
-
-                                            @error('sold_price')
+                                            <label>Sold Points (Auction)</label>
+                                            <input type="number" name="sold_out_points"
+                                                value="{{ old('sold_out_points', $player->sold_out_points ?? '') }}"
+                                                class="form-control @error('sold_out_points') is-invalid @enderror"
+                                                placeholder="Enter sold points">
+                                            <small class="text-muted">Actual points paid by the team.</small>
+                                            @error('sold_out_points')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -304,14 +329,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Description -->
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Description</label>
-                                            <textarea name="description" class="form-control" rows="3" placeholder="Player description">{{ old('description', $player->description ?? '') }}</textarea>
-                                        </div>
-                                    </div>
-
                                     <!-- Registration Status -->
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -349,6 +366,14 @@
                                         </div>
                                     </div>
 
+                                    <!-- Description -->
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <textarea name="description" class="form-control" rows="3" placeholder="Player description">{{ old('description', $player->description ?? '') }}</textarea>
+                                        </div>
+                                    </div>
+
                                     <!-- Player Photo -->
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -357,7 +382,7 @@
                                             @if ($player->photo)
                                                 <div class="mt-2">
                                                     <img src="{{ asset('storage/' . $player->photo) }}" width="80"
-                                                        >
+                                                        class="rounded border shadow-sm">
                                                     <small class="text-muted d-block mt-1">Current photo — leave empty to
                                                         keep</small>
                                                 </div>
@@ -378,7 +403,7 @@
                                                     <a href="{{ asset('storage/' . $player->detail->payment_screenshot) }}"
                                                         target="_blank">
                                                         <img src="{{ asset('storage/' . $player->detail->payment_screenshot) }}"
-                                                            width="80" 
+                                                            width="80" class="rounded border shadow-sm"
                                                             alt="Payment Screenshot">
                                                     </a>
                                                     <small class="text-muted d-block mt-1">Current screenshot — leave empty
@@ -402,7 +427,7 @@
                                                         <a href="{{ asset('storage/' . $player->detail->original_proof) }}"
                                                             target="_blank">
                                                             <img src="{{ asset('storage/' . $player->detail->original_proof) }}"
-                                                                width="80" 
+                                                                width="80" class="rounded border shadow-sm"
                                                                 alt="Original Proof">
                                                         </a>
                                                     @else
@@ -433,7 +458,7 @@
                                     </div>
 
                                     <!-- Buttons -->
-                                    <div class="col-md-12 text-right">
+                                    <div class="col-md-12 text-right border-top pt-3">
                                         <a href="{{ url('players') }}" class="btn btn-default" style="padding:7px">
                                             <i class="fas fa-arrow-left"></i> {{ __('back') }}
                                         </a>
@@ -469,7 +494,6 @@
                 switcheryInstances.push(switchery);
             });
 
-            // Only regenerate the number when the tournament is CHANGED
             const tournamentSelect = document.getElementById('tournament_id');
             const playerNumberInput = document.getElementById('player_number');
             const playerId = '{{ $player->id ?? '' }}';
@@ -480,7 +504,6 @@
                 tournamentSelect.addEventListener('change', function() {
                     const tournamentId = this.value;
 
-                    // Reverted to original tournament → restore saved number
                     if (tournamentId === initialTournament) {
                         playerNumberInput.value = originalNumber;
                         return;
